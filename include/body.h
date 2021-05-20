@@ -129,6 +129,8 @@ void body_set_rotation(body_t *body, double angle);
 
 void body_set_rotation_speed(body_t *body, double rotation);
 
+double body_get_rotation_speed(body_t *body);
+
 /**
  * Applies a force to a body over the current tick.
  * If multiple forces are applied in the same tick, they should be added.

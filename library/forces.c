@@ -77,7 +77,7 @@ void force_creator_planet_gravity(void *aux) {
     body_t *body = a->body1;
     vector_t *g = (vector_t *) a->c;
     vector_t velocity = body_get_velocity(body);
-    body_add_force(body, vec_subtract(vec_negate(*g), velocity));
+    body_add_force(body, *g);
 }
 
 void handler_destructive_collision(body_t *body1, body_t *body2, vector_t axis, void *aux) {

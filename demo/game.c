@@ -11,16 +11,16 @@
 
 const size_t WINDOW_WIDTH_ = 1000;
 const size_t WINDOW_HEIGHT_ = 500;
-const vector_t RIGHT_VELOCITY = {500, 0};
-const vector_t LEFT_VELOCITY = {-500, 0};
-const vector_t JUMP_VELOCITY = {0, 200};
+const double RIGHT_VELOCITY = 500;
+const double LEFT_VELOCITY = -500;
+const double JUMP_VELOCITY = 200;
 const vector_t MIN_POINT = {0, 0};
 const vector_t MAX_POINT = {WINDOW_WIDTH_, WINDOW_HEIGHT_};
-const vector_t GRAVITY = {0, -100};
+const vector_t GRAVITY = {0, -300};
 const double WALL_ELASTICITY = 0.8;
 const double PLAYER_ELASTICITY = 1.2;
 const size_t BALL_NUMBER_IN_SCENE = 4;
-const double LEG_ROTATION_SPEED = 1.5;
+const double LEG_ROTATION_SPEED = 5;
 const double PLAYER_RADIUS = 25;
 const vector_t PLAYER1_BODY_SPAWN = {200, 32};
 const vector_t PLAYER1_LEG_SPAWN = {200 + 25, 15};
@@ -31,54 +31,75 @@ const double PLAYER2_ANGLE = 5*M_PI/12;
 const double CIRCLE_POINTS = 40;
 const double CIRC_NPOINTS = 40;
 const double CIRCLE_MASS = 1;
+const double BALL_RADIUS = 25;
+const vector_t BALL_SPAWN = {WINDOW_WIDTH_/2 , WINDOW_HEIGHT_/2};
 
 
 void on_key_player(char key, key_event_type_t type, void *scene) {
-    body_t *body = scene_get_body((scene_t*)scene, 0);
-    body_t *leg = scene_get_body((scene_t*)scene, 1);
+    body_t *body1 = scene_get_body((scene_t*)scene, 2);
+    body_t *leg1 = scene_get_body((scene_t*)scene, 3);
     if (type == KEY_PRESSED) {
         switch (key) {
-            case RIGHT_ARROW:
-                body_set_velocity(body, RIGHT_VELOCITY);
-                body_set_velocity(leg, RIGHT_VELOCITY);
-                break;
             case LEFT_ARROW:
-                body_set_velocity(body, LEFT_VELOCITY);
-                body_set_velocity(leg, LEFT_VELOCITY);
-                break;
+                if(true == true) {
+                    vector_t v = {.x = LEFT_VELOCITY, .y = body_get_velocity(body1).y};
+                    body_set_velocity(body1, v);
+                    body_set_velocity(leg1, v);
+                    break;
+                }
+            case RIGHT_ARROW:
+                if(true == true) {
+                    vector_t v = {RIGHT_VELOCITY, body_get_velocity(body1).y};
+                    body_set_velocity(body1, v);
+                    body_set_velocity(leg1, v);
+                    break;
+                }
             case UP_ARROW:
-                body_set_velocity(body, JUMP_VELOCITY);
-                body_set_velocity(leg, JUMP_VELOCITY);
-                break;
+                if(true == true) {
+                    vector_t v = {.x = body_get_velocity(body1).x, .y = JUMP_VELOCITY};
+                    body_set_velocity(body1, v);
+                    body_set_velocity(leg1, v);
+                    break;
+                }
             case SDLK_COMMA:
-                body_set_rotation_speed(leg, LEG_ROTATION_SPEED);
+                body_set_rotation_speed(leg1, -LEG_ROTATION_SPEED);
         }
     }
     else {
-        body_set_velocity(body, VEC_ZERO);
-        body_set_velocity(leg, VEC_ZERO);
-        if (body_get_rotation(body) <= PLAYER1_ANGLE){ body_set_rotation_speed(leg,-LEG_ROTATION_SPEED); }
-        else { body_set_rotation_speed(leg, 0); }
+        vector_t NO_X = {.x = 0, .y = body_get_velocity(body1).y * 0.8};
+        body_set_velocity(body1, NO_X);
+        body_set_velocity(leg1, NO_X);
+        if (body_get_rotation_speed(leg1) == LEG_ROTATION_SPEED) { body_set_rotation_speed(leg1, 0); }
+        else if (body_get_rotation_speed(leg1) == -LEG_ROTATION_SPEED){ body_set_rotation_speed(leg1, LEG_ROTATION_SPEED); }
     }
 
-    body_t *body2 = scene_get_body((scene_t*)scene, 2);
-    body_t *leg2 = scene_get_body((scene_t*)scene, 3);
+    body_t *body2 = scene_get_body((scene_t*)scene, 0);
+    body_t *leg2 = scene_get_body((scene_t*)scene, 1);
     if (type == KEY_PRESSED) {
         switch (key) {
             case SDLK_d:
-                body_set_velocity(body2, RIGHT_VELOCITY);
-                body_set_velocity(leg2, RIGHT_VELOCITY);
-                break;
+                if(true == true) {
+                    vector_t v = {.x = RIGHT_VELOCITY, .y = body_get_velocity(body2).y};
+                    body_set_velocity(body2, v);
+                    body_set_velocity(leg2, v);
+                    break;
+                }
             case SDLK_a:
-                body_set_velocity(body2, LEFT_VELOCITY);
-                body_set_velocity(leg2, LEFT_VELOCITY);
-                break;
+                if(true == true) {
+                    vector_t v = {.x = LEFT_VELOCITY, .y = body_get_velocity(body2).y};
+                    body_set_velocity(body2, v);
+                    body_set_velocity(leg2, v);
+                    break;
+                }
             case SDLK_w:
-                body_set_velocity(body2, JUMP_VELOCITY);
-                body_set_velocity(leg2, JUMP_VELOCITY);
-                break;
+                if(true == true) {
+                    vector_t v = {.x = body_get_velocity(body2).x, .y = JUMP_VELOCITY};
+                    body_set_velocity(body2, v);
+                    body_set_velocity(leg2, v);
+                    break;
+                }
             case SDLK_c:
-                body_set_rotation_speed(leg2, LEG_ROTATION_SPEED);
+                body_set_rotation_speed(leg2, -LEG_ROTATION_SPEED);
         }
     }
     else {
@@ -91,7 +112,6 @@ void on_key_player(char key, key_event_type_t type, void *scene) {
 }
 
 body_t *make_rectangle(int length, int height, vector_t spawn){
-
     list_t *rectangle = list_init(4, free);
     vector_t *v = malloc(sizeof(*v));
     *v = (vector_t) {-length, -height};
@@ -152,6 +172,7 @@ list_t *circle_init(double radius) {
 body_t *make_ball(scene_t *scene, double radius) {
     list_t *circ = circle_init(radius);
     body_t *ball = body_init(circ, CIRCLE_MASS, choose_rand_color());
+    body_set_centroid(ball, BALL_SPAWN);
     scene_add_body(scene, ball);
     return ball;
 }
@@ -191,13 +212,13 @@ int main() {
 
     scene_t *scene = scene_init();
 
-    body_t *player1_body = make_player_body(scene, GREEN, PLAYER1_BODY_SPAWN);
-    body_t *player1_leg = make_player_leg(scene, GREEN, PLAYER1_LEG_SPAWN, PLAYER1_ANGLE);
+    make_player_body(scene, GREEN, PLAYER1_BODY_SPAWN);
+    make_player_leg(scene, GREEN, PLAYER1_LEG_SPAWN, PLAYER1_ANGLE);
 
-    body_t *player2_body = make_player_body(scene, BLUE, PLAYER2_BODY_SPAWN);
-    body_t *player2_leg = make_player_leg(scene, BLUE, PLAYER2_LEG_SPAWN, PLAYER2_ANGLE);
+    make_player_body(scene, BLUE, PLAYER2_BODY_SPAWN);
+    make_player_leg(scene, BLUE, PLAYER2_LEG_SPAWN, PLAYER2_ANGLE);
 
-    body_t *ball = make_ball(scene, 10);
+    make_ball(scene, BALL_RADIUS);
 
     sdl_on_key((key_handler_t) on_key_player);
     //add gravity to ball and players

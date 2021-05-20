@@ -70,6 +70,10 @@ void body_set_rotation_speed(body_t *body, double rotation){
     body->rotation_speed = rotation;
 }
 
+double body_get_rotation_speed(body_t *body) {
+    return body->rotation_speed;
+}
+
 double body_get_rotation(body_t *body){
     return body->rotation;
 }
