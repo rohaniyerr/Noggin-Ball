@@ -119,6 +119,8 @@ void create_physics_collision(
 
 void create_planet_gravity(scene_t *scene, vector_t gravity, body_t *body);
 
+void create_normal_force(scene_t *scene, vector_t GRAVITY, body_t *body1, body_t *body2);
+
 void create_color_changer(scene_t *scene, list_t *colors, body_t *body1, body_t *body2);
 
 #endif // #ifndef __FORCES_H__

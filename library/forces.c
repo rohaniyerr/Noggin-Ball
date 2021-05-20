@@ -77,7 +77,7 @@ void force_creator_planet_gravity(void *aux) {
     body_t *body = a->body1;
     vector_t *g = (vector_t *) a->c;
     vector_t velocity = body_get_velocity(body);
-    body_add_force(body, *g);
+    body_add_force(body, vec_add(*g, velocity));
 }
 
 void handler_destructive_collision(body_t *body1, body_t *body2, vector_t axis, void *aux) {
@@ -121,6 +121,12 @@ void handler_physics_collision(body_t *body1, body_t *body2, vector_t axis, void
     if (body_get_mass(body1) == INFINITY && body_get_mass(body2) == INFINITY) {impulse = 0;}
     body_add_impulse(body2, (vector_t) vec_multiply(-impulse, axis));
     body_add_impulse(body1, (vector_t) vec_multiply(impulse, axis));
+}
+
+// body2 = floor
+void handler_physics_normal_force(body_t *body1, body_t *body2, vector_t axis, void*aux) {
+    vector_t *NORMAL = (vector_t*) aux;
+    body_add_impulse(body1, *NORMAL);
 }
 
 void force_creator_collision(void *aux) {
@@ -184,6 +190,12 @@ void create_physics_collision(scene_t *scene, double elasticity, body_t *body1, 
 
 void create_destructive_collision(scene_t *scene, body_t *body1, body_t *body2) {
     create_collision(scene, body1, body2, (collision_handler_t) handler_destructive_collision, NULL, NULL);
+}
+
+void create_normal_force(scene_t *scene, vector_t NORMAL, body_t *body1, body_t *body2) {
+    vector_t *n = malloc(sizeof(vector_t));
+    *n = NORMAL;
+    create_collision(scene, body1, body2, (collision_handler_t) handler_physics_normal_force, (void *) n, free);
 }
 
 void create_color_changer(scene_t *scene, list_t *colors, body_t *body1, body_t *body2) {
