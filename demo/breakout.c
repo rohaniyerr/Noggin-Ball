@@ -63,9 +63,7 @@ list_t *color_list() {
     return colors;
 }
 
-
 body_t *make_rectangle(int length, int height, vector_t spawn){
-
     list_t *rectangle = list_init(4, free);
     vector_t *v = malloc(sizeof(*v));
     *v = (vector_t) {-length, -height};
@@ -84,7 +82,6 @@ body_t *make_rectangle(int length, int height, vector_t spawn){
     body_set_mass(body, INFINITY);
     return body;
 }
-
 
 bool hits_edge_player(body_t *body, double dt) {
     if (body_get_centroid(body).x + PLAYER_LENGTH + body_get_velocity(body).x * dt >= WINDOW_WIDTH_) {return true;}
