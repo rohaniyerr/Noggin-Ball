@@ -76,8 +76,9 @@ void on_key_player2(char key, key_event_type_t type, void *scene) {
         }
     }
     else {
-        body_set_velocity(body, VEC_ZERO);
-        body_set_velocity(leg, VEC_ZERO);
+        vector_t NO_X = {.x = 0, .y = body_get_velocity(body).y};
+        body_set_velocity(body, NO_X);
+        body_set_velocity(leg, NO_X);
         if (body_get_rotation(body) >= PLAYER2_ANGLE){ body_set_rotation_speed(leg,-LEG_ROTATION_SPEED); }
         else { body_set_rotation_speed(leg, 0); }
     }
