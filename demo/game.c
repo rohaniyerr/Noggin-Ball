@@ -34,6 +34,11 @@ const double CIRC_NPOINTS = 40;
 const double CIRCLE_MASS = 1;
 const double BALL_RADIUS = 25;
 const vector_t BALL_SPAWN = {WINDOW_WIDTH_/2 , WINDOW_HEIGHT_/2};
+const double FOOT_HEIGHT = 10;
+const double FOOT_LENGTH = 20;
+const double LEG_LENGTH = 25;
+const double LEG_HEIGHT = 25;
+const double FOOT_RADIUS = 10;
 
 
 void on_key_player(char key, key_event_type_t type, void *scene) {
@@ -219,19 +224,34 @@ body_t *make_ball(scene_t *scene, double radius) {
     return ball;
 }
 
-body_t *make_oval(rgb_color_t *color) {
+body_t *make_oval(rgb_color_t *color, double radius) {
     list_t *c = list_init(CIRC_NPOINTS, (free_func_t) free);
     for (size_t i = 0; i < CIRC_NPOINTS; i++) {
         double angle = 2 * M_PI * i / CIRC_NPOINTS;
         vector_t *v = malloc(sizeof(*v));
-        *v = (vector_t) {PLAYER_RADIUS * cos(angle), 1.5 * PLAYER_RADIUS * sin(angle)};
+        *v = (vector_t) {radius * cos(angle), 1.5 * radius * sin(angle)};
         list_add(c, v);
     }
-    return body_init(c, 1, *color);
+    return body_init(c, INFINITY, *color);
+}
+
+body_t *make_leg(rgb_color_t *color, vector_t spawn){
+    list_t *leg = body_get_shape(make_rectangle(LEG_LENGTH, LEG_HEIGHT, spawn));
+    list_t *foot = body_get_shape(make_oval(color, FOOT_RADIUS));
+    size_t num_vectors = list_size(leg) + list_size(foot);
+    list_t *full_leg = list_init(num_vectors, free);
+    for(size_t i = 0; i < list_size(leg); i++){
+        list_add(full_leg, list_get(leg, i));
+    }
+    for(size_t i = 0; i < list_size(foot); i++){
+        list_add(full_leg, list_get(foot, i));
+    }
+    body_t *body_leg = body_init(full_leg, 1, choose_rand_color());
+    return body_leg;
 }
 
 body_t *make_player_body(scene_t *scene, rgb_color_t *color, vector_t spawn) {
-    body_t *player_body = make_oval(color);
+    body_t *player_body = make_oval(color, PLAYER_RADIUS);
     body_set_color(player_body, color);
     body_set_centroid(player_body, spawn);
     scene_add_body(scene, player_body);
@@ -239,7 +259,7 @@ body_t *make_player_body(scene_t *scene, rgb_color_t *color, vector_t spawn) {
 }
 
 body_t *make_player_leg(scene_t *scene, rgb_color_t *color, vector_t spawn, double angle) {
-    body_t *leg = make_rectangle(PLAYER_RADIUS, 5, spawn);
+    body_t *leg = make_leg(color, spawn);
     body_set_color(leg, color);
     body_set_rotation(leg, angle);
     scene_add_body(scene, leg);
