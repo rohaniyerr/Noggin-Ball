@@ -11,15 +11,15 @@
 
 const size_t WINDOW_WIDTH_ = 1000;
 const size_t WINDOW_HEIGHT_ = 500;
-const double RIGHT_VELOCITY = 500;
-const double LEFT_VELOCITY = -500;
+const double RIGHT_VELOCITY = 200;
+const double LEFT_VELOCITY = -200;
 const double JUMP_VELOCITY = 200;
 const vector_t MIN_POINT = {0, 0};
 const vector_t MAX_POINT = {WINDOW_WIDTH_, WINDOW_HEIGHT_};
-const vector_t GRAVITY = {0, -300};
+const vector_t GRAVITY = {0, -500};
 const vector_t NORMAL = {0, 300};
 const double WALL_ELASTICITY = 0.2;
-const double PLAYER_ELASTICITY = 1.2;
+const double PLAYER_ELASTICITY = 0.4;
 const size_t BALL_NUMBER_IN_SCENE = 4;
 const double LEG_ROTATION_SPEED = 5;
 const double PLAYER_RADIUS = 25;
@@ -132,7 +132,7 @@ body_t *make_rectangle(int length, int height, vector_t spawn){
     list_add(rectangle, v);
     body_t *body = body_init(rectangle, 1, choose_rand_color());
     body_set_centroid(body, spawn);
-    body_set_mass(body, 1000);
+    body_set_mass(body, 1);
     return body;
 }
 
@@ -227,7 +227,7 @@ body_t *make_oval(rgb_color_t *color) {
         *v = (vector_t) {PLAYER_RADIUS * cos(angle), 1.5 * PLAYER_RADIUS * sin(angle)};
         list_add(c, v);
     }
-    return body_init(c, 1000, *color);
+    return body_init(c, 1, *color);
 }
 
 body_t *make_player_body(scene_t *scene, rgb_color_t *color, vector_t spawn) {
@@ -256,7 +256,6 @@ int main() {
 
     make_player_body(scene, GREEN, PLAYER1_BODY_SPAWN); //0
     make_player_leg(scene, GREEN, PLAYER1_LEG_SPAWN, PLAYER1_ANGLE); //1
-
     make_player_body(scene, BLUE, PLAYER2_BODY_SPAWN); //2
     make_player_leg(scene, BLUE, PLAYER2_LEG_SPAWN, PLAYER2_ANGLE); //3
 
@@ -266,14 +265,14 @@ int main() {
     make_goals(scene); //9,10,11,12
 
     sdl_on_key((key_handler_t) on_key_player);
+
     //add gravity to ball and players
     for (size_t i = 0; i < 5; i++) { 
         create_planet_gravity(scene, GRAVITY, scene_get_body(scene, i));
-        create_normal_force(scene, NORMAL, scene_get_body(scene, i), scene_get_body(scene, 8));
     }
     //add physics collisions between players and ball
     for (size_t i = 0; i < 4; i++) { 
-        create_physics_collision(scene, PLAYER_ELASTICITY, scene_get_body(scene, BALL_NUMBER_IN_SCENE), scene_get_body(scene, i));
+        create_physics_one_collision(scene, PLAYER_ELASTICITY, scene_get_body(scene, i), scene_get_body(scene, BALL_NUMBER_IN_SCENE));
     }
     //add physics collisions between the ball and the walls
     //add physics collisions between players and walls

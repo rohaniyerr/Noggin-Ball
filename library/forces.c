@@ -123,11 +123,22 @@ void handler_physics_collision(body_t *body1, body_t *body2, vector_t axis, void
     body_add_impulse(body1, (vector_t) vec_multiply(impulse, axis));
 }
 
-// body2 = floor
-void handler_physics_normal_force(body_t *body1, body_t *body2, vector_t axis, void*aux) {
-    vector_t *NORMAL = (vector_t*) aux;
-    body_add_impulse(body1, *NORMAL);
-}
+void handler_physics_one_collision(body_t *body1, body_t *body2, vector_t axis, void *aux) {
+    double *elasticity = (double*) aux;
+
+    double reduced_mass = body_get_mass(body1) * body_get_mass(body2) / (body_get_mass(body1) + body_get_mass(body2));
+    double u_b = vec_dot(body_get_velocity(body2), axis);
+    double u_a = vec_dot(body_get_velocity(body1), axis);
+    if (body_get_mass(body1) == INFINITY) {
+        reduced_mass = body_get_mass(body2);
+    }
+    if (body_get_mass(body2) == INFINITY) {
+        reduced_mass = body_get_mass(body1);
+    }
+    double impulse = reduced_mass * (1 + *elasticity) * (u_b - u_a);
+    if (body_get_mass(body1) == INFINITY && body_get_mass(body2) == INFINITY) {impulse = 0;}
+    body_add_impulse(body2, (vector_t) vec_multiply(-impulse, axis));
+} 
 
 void force_creator_collision(void *aux) {
     collision_aux_t *info = (collision_aux_t*) aux;
@@ -188,14 +199,14 @@ void create_physics_collision(scene_t *scene, double elasticity, body_t *body1, 
     create_collision(scene, body1, body2, (collision_handler_t) handler_physics_collision, (void *) e, free);
 }
 
-void create_destructive_collision(scene_t *scene, body_t *body1, body_t *body2) {
-    create_collision(scene, body1, body2, (collision_handler_t) handler_destructive_collision, NULL, NULL);
+void create_physics_one_collision(scene_t *scene, double elasticity, body_t *body1, body_t *body2) {
+    double *e = malloc(sizeof(double));
+    *e = elasticity;
+    create_collision(scene, body1, body2, (collision_handler_t) handler_physics_one_collision, (void *) e, free);
 }
 
-void create_normal_force(scene_t *scene, vector_t NORMAL, body_t *body1, body_t *body2) {
-    vector_t *n = malloc(sizeof(vector_t));
-    *n = NORMAL;
-    create_collision(scene, body1, body2, (collision_handler_t) handler_physics_normal_force, (void *) n, free);
+void create_destructive_collision(scene_t *scene, body_t *body1, body_t *body2) {
+    create_collision(scene, body1, body2, (collision_handler_t) handler_destructive_collision, NULL, NULL);
 }
 
 void create_color_changer(scene_t *scene, list_t *colors, body_t *body1, body_t *body2) {
