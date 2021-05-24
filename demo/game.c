@@ -262,9 +262,9 @@ body_t *make_ball(scene_t *scene, double radius) {
 }
 
 body_t *make_oval(rgb_color_t *color, double radius, double x_scalar, double y_scalar) {
-    list_t *c = list_init(CIRC_NPOINTS, (free_func_t) free);
-    for (size_t i = 0; i < CIRC_NPOINTS; i++) {
-        double angle = 2 * M_PI * i / CIRC_NPOINTS;
+    list_t *c = list_init(CIRCLE_POINTS, (free_func_t) free);
+    for (size_t i = 0; i < CIRCLE_POINTS; i++) {
+        double angle = 2 * M_PI * i / CIRCLE_POINTS;
         vector_t *v = malloc(sizeof(*v));
         *v = (vector_t) {x_scalar * radius * cos(angle), y_scalar * radius * sin(angle)};
         list_add(c, v);
