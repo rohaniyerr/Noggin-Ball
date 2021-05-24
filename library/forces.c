@@ -123,9 +123,23 @@ void handler_physics_collision(body_t *body1, body_t *body2, vector_t axis, void
     body_add_impulse(body1, (vector_t) vec_multiply(impulse, axis));
 }
 
+void force_creator_normal_force(void *aux) {
+    aux_t *a = (aux_t*) aux;
+    body_t *body = a->body1;
+    body_t *floor = a->body2;
+    collision_info_t info = find_collision(body_get_shape(body), body_get_shape(floor));
+    if (info.collided) {
+        vector_t force = body_get_force(body);
+        vector_t normal_f = {.x = 0, .y = -force.y};
+        body_add_force(body, normal_f);
+        vector_t impulse = body_get_impulse(body);
+        vector_t normal_i = {.x = 0, .y = -impulse.y};
+        body_add_impulse(body, normal_i);
+    }
+}
+
 void handler_physics_one_collision(body_t *body1, body_t *body2, vector_t axis, void *aux) {
     double *elasticity = (double*) aux;
-
     double reduced_mass = body_get_mass(body1) * body_get_mass(body2) / (body_get_mass(body1) + body_get_mass(body2));
     double u_b = vec_dot(body_get_velocity(body2), axis);
     double u_a = vec_dot(body_get_velocity(body1), axis);
@@ -136,8 +150,18 @@ void handler_physics_one_collision(body_t *body1, body_t *body2, vector_t axis, 
         reduced_mass = body_get_mass(body1);
     }
     double impulse = reduced_mass * (1 + *elasticity) * (u_b - u_a);
+    if (fabs(u_b - u_a) < 25) {
+        if (impulse < 0) {
+            impulse = -5000;
+            body_add_force(body2, (vector_t) {-100, 0});
+        }
+        else {
+            impulse = 5000;
+            body_add_force(body2, (vector_t) {100, 0});
+        }
+    }
     if (body_get_mass(body1) == INFINITY && body_get_mass(body2) == INFINITY) {impulse = 0;}
-    body_add_impulse(body2, (vector_t) vec_multiply(-impulse, axis));
+    body_add_impulse(body2, (vector_t) vec_multiply(-10*impulse, axis));
 } 
 
 void force_creator_collision(void *aux) {
@@ -220,4 +244,11 @@ void create_planet_gravity(scene_t *scene, vector_t gravity, body_t *body) {
     list_t *bodies = list_init(2, (free_func_t) free);
     list_add(bodies, body);
     scene_add_force_creator(scene, force_creator_planet_gravity, aux, (free_func_t) free);
+}
+
+void create_normal_force(scene_t *scene, body_t *body, body_t *floor) {
+    aux_t *aux = aux_init(body, floor, NULL);
+    list_t *bodies = list_init(2, (free_func_t) free);
+    list_add(bodies, body);
+    scene_add_force_creator(scene, force_creator_normal_force, aux, (free_func_t) free);
 }

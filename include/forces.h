@@ -125,4 +125,6 @@ void create_physics_one_collision(scene_t *scene, double elasticity, body_t *bod
 
 void create_color_changer(scene_t *scene, list_t *colors, body_t *body1, body_t *body2);
 
+void create_normal_force(scene_t *scene, body_t *body, body_t *floor);
+
 #endif // #ifndef __FORCES_H__

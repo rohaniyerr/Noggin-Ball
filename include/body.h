@@ -191,4 +191,8 @@ void body_set_color(body_t *body, rgb_color_t *color);
 
 double body_get_rotation(body_t *body);
 
+vector_t body_get_impulse(body_t *body);
+
+vector_t body_get_force(body_t *body);
+
 #endif // #ifndef __BODY_H__

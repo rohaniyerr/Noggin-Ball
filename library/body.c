@@ -151,3 +151,11 @@ void body_remove(body_t *body) {
 bool body_is_removed(body_t *body) {
     return body->remove;
 }
+
+vector_t body_get_force(body_t *body) {
+    return body->force;
+}
+
+vector_t body_get_impulse(body_t *body) {
+    return body->impulse;
+}
