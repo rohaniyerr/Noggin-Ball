@@ -11,35 +11,37 @@
 
 const size_t WINDOW_WIDTH_ = 1000;
 const size_t WINDOW_HEIGHT_ = 500;
+const vector_t MIN_POINT = {0, 0};
+const vector_t MAX_POINT = {WINDOW_WIDTH_, WINDOW_HEIGHT_};
+
 const double RIGHT_VELOCITY = 200;
 const double LEFT_VELOCITY = -200;
 const double JUMP_VELOCITY = 200;
-const vector_t MIN_POINT = {0, 0};
-const vector_t MAX_POINT = {WINDOW_WIDTH_, WINDOW_HEIGHT_};
+
 const vector_t GRAVITY = {0, -500};
-const vector_t NORMAL = {0, 300};
 const double WALL_ELASTICITY = 0.2;
 const double PLAYER_ELASTICITY = 0.4;
 const size_t BALL_NUMBER_IN_SCENE = 4;
+const size_t FLOOR_NUMBER = 8;
+
 const double LEG_ROTATION_SPEED = 5;
 const double PLAYER_RADIUS = 25;
-const vector_t PLAYER1_BODY_SPAWN = {200, 88};
 const double PLAYER1_ANGLE = 19*M_PI/12;
+const double PLAYER2_ANGLE = 5*M_PI/12;
+const vector_t PLAYER1_BODY_SPAWN = {200, 88};
 const vector_t PLAYER2_BODY_SPAWN = {800, 88};
 const vector_t PLAYER1_LEG_SPAWN = {200, 35};
 const vector_t PLAYER2_LEG_SPAWN = {800, 35};
-const double PLAYER2_ANGLE = 5*M_PI/12;
+const double PLAYER_MAJOR_AXIS = 1;
+const double PLAYER_MINOR_AXIS = 1.5;
+const vector_t PLAYER1_LEG_TOP_RIGHT = {200, 30};
+const vector_t PLAYER2_LEG_TOP_RIGHT = {800, 30};
+const size_t LEG_SCALING = 3;
+
 const double CIRCLE_POINTS = 40;
-const double CIRC_NPOINTS = 40;
 const double CIRCLE_MASS = 1;
 const double BALL_RADIUS = 15;
 const vector_t BALL_SPAWN = {WINDOW_WIDTH_/2 , WINDOW_HEIGHT_/2};
-const double PLAYER_MAJOR_AXIS = 1;
-const double PLAYER_MINOR_AXIS = 1.5;
-const size_t FLOOR_NUMBER = 8;
-const int LEG_SCALING = 3;
-const vector_t PLAYER1_LEG_TOP_RIGHT = {200, 30};
-const vector_t PLAYER2_LEG_TOP_RIGHT = {800, 30};
 
 
 void on_key_player(char key, key_event_type_t type, void *scene) {
@@ -427,13 +429,11 @@ int main() {
         }
     }
 
-    double time = 0;
     while (!sdl_is_done(scene)) {
         double dt = time_since_last_tick();
         check_edge(scene);
         scene_tick(scene, dt);
         sdl_render_scene(scene);
-        time += dt;
     }
     scene_free(scene);
     return 0;
