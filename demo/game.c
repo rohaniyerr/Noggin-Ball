@@ -31,7 +31,7 @@ const double PLAYER2_ANGLE = 5*M_PI/12;
 const vector_t PLAYER1_BODY_SPAWN = {200, 88};
 const vector_t PLAYER2_BODY_SPAWN = {800, 88};
 const vector_t PLAYER1_LEG_SPAWN = {200, 35};
-const vector_t PLAYER2_LEG_SPAWN = {800, 35};
+const vector_t PLAYER2_LEG_SPAWN = {780, 35};
 const double PLAYER_MAJOR_AXIS = 1;
 const double PLAYER_MINOR_AXIS = 1.5;
 const vector_t PLAYER1_LEG_TOP_RIGHT = {200, 30};
@@ -72,16 +72,23 @@ void on_key_player(char key, key_event_type_t type, void *scene) {
                         body_set_velocity(body1, v);
                         body_set_velocity(leg1, v);
                     }
+                    break;
                 }
             case SDLK_COMMA:
-                body_set_rotation_speed(leg1, -LEG_ROTATION_SPEED);
+                if (true == true) {
+                    body_set_rotation_speed(leg1, -LEG_ROTATION_SPEED);
+                    break;
+                }
         }
     }
     else if (type == KEY_RELEASED) {
         switch (key) {
             case SDLK_COMMA:
-                body_set_rotation_speed(leg1, 0);
-                body_set_rotation(leg1, PLAYER1_ANGLE);
+                if (true == true) {
+                    body_set_rotation_speed(leg1, 0);
+                    body_set_rotation(leg1, PLAYER1_ANGLE);
+                    break;
+                }
             case LEFT_ARROW:
                 if (true == true) {
                     vector_t NO_X2 = {.x = 0, .y = body_get_velocity(body1).y};
@@ -96,7 +103,10 @@ void on_key_player(char key, key_event_type_t type, void *scene) {
                     body_set_velocity(leg1, NO_X2);
                     break;
                 }
-
+            case UP_ARROW:
+                if (true == true) {
+                    break;
+                }
         }
     }
 
@@ -136,8 +146,11 @@ void on_key_player(char key, key_event_type_t type, void *scene) {
     else if (type == KEY_RELEASED) {
         switch (key) {
             case SDLK_c:
-                body_set_rotation_speed(leg2, 0);
-                body_set_rotation(leg2, PLAYER2_ANGLE);
+                if (true == true) {
+                    body_set_rotation_speed(leg2, 0);
+                    body_set_rotation(leg2, PLAYER2_ANGLE);
+                    break;
+                }
             case SDLK_a:
                 if (true == true) {
                     vector_t NO_X2 = {.x = 0, .y = body_get_velocity(body2).y};
@@ -272,8 +285,7 @@ body_t *make_oval(rgb_color_t *color, double radius, double x_scalar, double y_s
     return body_init(c, INFINITY, *color);
 }
 
-body_t *make_p2_leg(scene_t *scene, rgb_color_t *color, vector_t spawn, vector_t top_right){
-    
+void make_p2_leg(scene_t *scene, rgb_color_t *color, vector_t spawn, vector_t top_right){
     list_t *leg = list_init(5, free);
     
     vector_t *v = malloc(sizeof(*v));
@@ -313,10 +325,9 @@ body_t *make_p2_leg(scene_t *scene, rgb_color_t *color, vector_t spawn, vector_t
     body_set_rotation(body, PLAYER2_ANGLE);
     body_set_centroid(body, spawn);
     scene_add_body(scene, body);
-    return body;
 }
 
-body_t *make_p1_leg(scene_t *scene, rgb_color_t *color, vector_t spawn, vector_t top_left){
+void make_p1_leg(scene_t *scene, rgb_color_t *color, vector_t spawn, vector_t top_left){
     
     list_t *leg = list_init(5, free);
     
@@ -357,7 +368,6 @@ body_t *make_p1_leg(scene_t *scene, rgb_color_t *color, vector_t spawn, vector_t
     body_set_rotation(body, PLAYER1_ANGLE);
     body_set_centroid(body, spawn);
     scene_add_body(scene, body);
-    return body;
 }
 
 body_t *make_player_body(scene_t *scene, rgb_color_t *color, vector_t spawn) {
@@ -370,14 +380,14 @@ body_t *make_player_body(scene_t *scene, rgb_color_t *color, vector_t spawn) {
 }
 
 void check_edge(scene_t *scene) {
-    for (size_t i = 0; i < 5; i++) {
-        body_t *body = scene_get_body(scene, i);
-        vector_t centroid = body_get_centroid(body);
-        if (centroid.y <= 32) {
-            vector_t new_centroid = {.x = centroid.x, .y = 50};
-            body_set_centroid(body, new_centroid);
-        }
-    }
+    // for (size_t i = 0; i < 5; i++) {
+    //     body_t *body = scene_get_body(scene, i);
+    //     vector_t centroid = body_get_centroid(body);
+    //     if (centroid.y <= 32 && i % 2 == 0) {
+    //         vector_t new_centroid = {.x = centroid.x, .y = 50};
+    //         body_set_centroid(body, new_centroid);
+    //     }
+    // }
     body_t *ball = scene_get_body(scene, 4);
     vector_t centroid = body_get_centroid(ball);
     if (centroid.x <= 15) {
@@ -388,6 +398,13 @@ void check_edge(scene_t *scene) {
         vector_t new_centroid = {.x = 950, .y = centroid.y};
         body_set_centroid(ball, new_centroid);
     }
+    if (centroid.y <= 30) {
+        vector_t new_centroid = {.x = centroid.x, .y = 33};
+        vector_t velocity = {.x = body_get_velocity(ball).x, .y = fabs(body_get_velocity(ball).y)/2};
+        body_set_velocity(ball, velocity);
+        body_set_centroid(ball, new_centroid);
+    }
+
 }
 
 int main() {
@@ -400,9 +417,9 @@ int main() {
     scene_t *scene = scene_init();
 
     make_player_body(scene, GREEN, PLAYER1_BODY_SPAWN); //0
-    make_p1_leg(scene, BLACK, PLAYER1_LEG_SPAWN, PLAYER1_LEG_TOP_RIGHT);
+    make_p1_leg(scene, BLACK, PLAYER1_LEG_SPAWN, PLAYER1_LEG_TOP_RIGHT); //1
     make_player_body(scene, BLUE, PLAYER2_BODY_SPAWN); //2
-    make_p2_leg(scene, BLACK, PLAYER2_LEG_SPAWN, PLAYER2_LEG_TOP_RIGHT);
+    make_p2_leg(scene, BLACK, PLAYER2_LEG_SPAWN, PLAYER2_LEG_TOP_RIGHT); //3
 
     make_ball(scene, BALL_RADIUS); //4
 
