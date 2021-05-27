@@ -18,14 +18,14 @@ const double RIGHT_VELOCITY = 200;
 const double LEFT_VELOCITY = -200;
 const double JUMP_VELOCITY = 200;
 
-const double GAMMA = 1.2;
+const double GAMMA = 2.5;
 const vector_t GRAVITY = {0, -350};
 const double WALL_ELASTICITY = 0.05;
 const double PLAYER_ELASTICITY = 0.4;
 const size_t BALL_NUMBER_IN_SCENE = 4;
 const size_t FLOOR_NUMBER = 8;
 
-const double LEG_ROTATION_SPEED = 5;
+const double LEG_ROTATION_SPEED = 8;
 const double PLAYER_RADIUS = 25;
 const double PLAYER1_ANGLE = 19*M_PI/12;
 const double PLAYER2_ANGLE = 5*M_PI/12;
@@ -44,11 +44,36 @@ const double CIRCLE_MASS = 1;
 const double BALL_RADIUS = 15;
 const vector_t BALL_SPAWN = {WINDOW_WIDTH_/2 , WINDOW_HEIGHT_/2};
 
+typedef struct player {
+    body_t *body;
+    body_t *leg;
+    size_t score;
+    double jump_scalar;
+    double speed_scalar;
+    double kick_speed;
+} player_t;
+
+player_t *player_init(body_t *body, body_t *leg, double jump, double speed, double kick_speed) {
+    player_t *player = malloc(sizeof(player_t));
+    player->body = body;
+    player->leg = leg;
+    player->score = 0;
+    player->jump_scalar = jump;
+    player->speed_scalar = speed;
+    player->kick_speed = kick_speed;
+    return player;
+}
+
+void player_set_velocity(player_t *player, vector_t velocity) {
+    body_set_velocity(player->body, velocity);
+    body_set_velocity(player->leg, velocity);
+}
 
 void on_key_player(char key, key_event_type_t type, void *scene) {
     body_t *body1 = scene_get_body((scene_t*)scene, 2);
     body_t *leg1 = scene_get_body((scene_t*)scene, 3);
     body_set_rotation_speed(leg1, 0);
+    body_set_rotation(leg1, PLAYER1_ANGLE);
     if (type == KEY_PRESSED) {
         switch (key) {
             case LEFT_ARROW:
@@ -82,38 +107,40 @@ void on_key_player(char key, key_event_type_t type, void *scene) {
                 }
         }
     }
-    else if (type == KEY_RELEASED) {
-        switch (key) {
-            case SDLK_COMMA:
-                if (true == true) {
-                    body_set_rotation_speed(leg1, 0);
-                    body_set_rotation(leg1, PLAYER1_ANGLE);
-                    break;
-                }
-            case LEFT_ARROW:
-                if (true == true) {
-                    vector_t NO_X2 = {.x = 0, .y = body_get_velocity(body1).y};
-                    body_set_velocity(body1, NO_X2);
-                    body_set_velocity(leg1, NO_X2);
-                    break;
-                }
-            case RIGHT_ARROW:
-                if (true == true) {
-                    vector_t NO_X2 = {.x = 0, .y = body_get_velocity(body1).y};
-                    body_set_velocity(body1, NO_X2);
-                    body_set_velocity(leg1, NO_X2);
-                    break;
-                }
-            case UP_ARROW:
-                if (true == true) {
-                    break;
-                }
-        }
+    else {
+        vector_t NO_X2 = {.x = 0, .y = body_get_velocity(body1).y};
+        body_set_velocity(body1, NO_X2);
+        body_set_velocity(leg1, NO_X2);
     }
+    // else if (type == KEY_RELEASED) {
+    //     switch (key) {
+    //         case SDLK_COMMA:
+    //             if (true == true) {
+    //                 body_set_rotation_speed(leg1, 0);
+    //                 body_set_rotation(leg1, PLAYER1_ANGLE);
+    //                 break;
+    //             }
+    //         case LEFT_ARROW:
+    //             if (true == true) {
+    //                 vector_t NO_X2 = {.x = 0, .y = body_get_velocity(body1).y};
+    //                 body_set_velocity(body1, NO_X2);
+    //                 body_set_velocity(leg1, NO_X2);
+    //                 break;
+    //             }
+    //         case RIGHT_ARROW:
+    //             if (true == true) {
+    //                 vector_t NO_X2 = {.x = 0, .y = body_get_velocity(body1).y};
+    //                 body_set_velocity(body1, NO_X2);
+    //                 body_set_velocity(leg1, NO_X2);
+    //                 break;
+    //             }
+    //     }
+    // }
 
     body_t *body2 = scene_get_body((scene_t*)scene, 0);
     body_t *leg2 = scene_get_body((scene_t*)scene, 1);
     body_set_rotation_speed(leg2, 0);
+    body_set_rotation(leg2, PLAYER2_ANGLE);    
     if (type == KEY_PRESSED) {
         switch (key) {
             case SDLK_d:
@@ -141,33 +168,16 @@ void on_key_player(char key, key_event_type_t type, void *scene) {
                     break;
                 }
             case SDLK_c:
-                body_set_rotation_speed(leg2, -LEG_ROTATION_SPEED);
+                if (true == true){
+                    body_set_rotation_speed(leg2, -LEG_ROTATION_SPEED);
+                    break;
+                }
         }
     }
-    else if (type == KEY_RELEASED) {
-        switch (key) {
-            case SDLK_c:
-                if (true == true) {
-                    body_set_rotation_speed(leg2, 0);
-                    body_set_rotation(leg2, PLAYER2_ANGLE);
-                    break;
-                }
-            case SDLK_a:
-                if (true == true) {
-                    vector_t NO_X2 = {.x = 0, .y = body_get_velocity(body2).y};
-                    body_set_velocity(body2, NO_X2);
-                    body_set_velocity(leg2, NO_X2);
-                    break;
-                }
-            case SDLK_d:
-                if (true == true) {
-                    vector_t NO_X2 = {.x = 0, .y = body_get_velocity(body2).y};
-                    body_set_velocity(body2, NO_X2);
-                    body_set_velocity(leg2, NO_X2);
-                    break;
-                }
-
-        }
+    else {
+        vector_t NO_X2 = {.x = 0, .y = body_get_velocity(body2).y};
+        body_set_velocity(body2, NO_X2);
+        body_set_velocity(leg2, NO_X2);
     }
 }
 
@@ -381,31 +391,39 @@ body_t *make_player_body(scene_t *scene, rgb_color_t *color, vector_t spawn) {
 }
 
 void check_edge(scene_t *scene) {
-    // for (size_t i = 0; i < 5; i++) {
-    //     body_t *body = scene_get_body(scene, i);
-    //     vector_t centroid = body_get_centroid(body);
-    //     if (centroid.y <= 32 && i % 2 == 0) {
-    //         vector_t new_centroid = {.x = centroid.x, .y = 50};
-    //         body_set_centroid(body, new_centroid);
-    //     }
-    // }
     body_t *ball = scene_get_body(scene, 4);
     vector_t centroid = body_get_centroid(ball);
-    if (centroid.x <= 15) {
-        vector_t new_centroid = {.x = 50, .y = centroid.y};
-        body_set_centroid(ball, new_centroid);
-    }
-    else if (centroid.x >= 1015) {
-        vector_t new_centroid = {.x = 950, .y = centroid.y};
-        body_set_centroid(ball, new_centroid);
-    }
     if (centroid.y <= 30) {
         vector_t new_centroid = {.x = centroid.x, .y = 33};
         vector_t velocity = {.x = body_get_velocity(ball).x, .y = fabs(body_get_velocity(ball).y)/2};
         body_set_velocity(ball, velocity);
         body_set_centroid(ball, new_centroid);
     }
+    for (size_t i = 0; i < 5; i++) {
+        body_t *body = scene_get_body(scene, i);
+        vector_t c = body_get_centroid(body);
+        if (c.x <= 15) {
+            vector_t new_centroid = {.x = 20, .y = c.y};
+            body_set_centroid(body, new_centroid);
+        }
+        else if (c.x >= 1015) {
+            vector_t new_centroid = {.x = 1010, .y = c.y};
+            body_set_centroid(body, new_centroid);
+        }
+    }
+}
 
+bool check_goal(body_t *ball) {
+    double y_lim = (WINDOW_HEIGHT_/8 - 22) + (WINDOW_HEIGHT_/4 - 20) - 2 * 10;
+    double x_left = 60 + 25;
+    double x_right = 940 - 25;
+    vector_t centroid = body_get_centroid(ball);
+    if (centroid.x + BALL_RADIUS <= x_left || centroid.x - BALL_RADIUS >= x_right) {
+        if (centroid.y + BALL_RADIUS <= y_lim) {
+            return true;
+        }
+    }
+    return false;
 }
 
 int main() {
@@ -456,6 +474,7 @@ int main() {
         double dt = time_since_last_tick();
         check_edge(scene);
         scene_tick(scene, dt);
+        check_goal(scene_get_body(scene, BALL_NUMBER_IN_SCENE));
         sdl_render_scene(scene);
     }
     scene_free(scene);
