@@ -16,10 +16,11 @@ const vector_t MAX_POINT = {WINDOW_WIDTH_, WINDOW_HEIGHT_};
 
 const double RIGHT_VELOCITY = 200;
 const double LEFT_VELOCITY = -200;
-const double JUMP_VELOCITY = 200;
+const double JUMP_VELOCITY = 100;
 
-const vector_t GRAVITY = {0, -500};
-const double WALL_ELASTICITY = 0.2;
+const double GAMMA = 0.9;
+const vector_t GRAVITY = {0, -300};
+const double WALL_ELASTICITY = 0.1;
 const double PLAYER_ELASTICITY = 0.4;
 const size_t BALL_NUMBER_IN_SCENE = 4;
 const size_t FLOOR_NUMBER = 8;
@@ -428,6 +429,8 @@ int main() {
 
     sdl_on_key((key_handler_t) on_key_player);
 
+    //add drag to ball so it doesn't accelerate
+    create_drag(scene, GAMMA, scene_get_body(scene, BALL_NUMBER_IN_SCENE));
     //add gravity to ball and players
     for (size_t i = 0; i < 5; i++) { 
         create_planet_gravity(scene, GRAVITY, scene_get_body(scene, i));
@@ -440,11 +443,14 @@ int main() {
     //add physics collisions between the ball and the walls
     //add physics collisions between players and walls
     for (size_t i = 5; i < scene_bodies(scene); i++) { 
-        create_physics_collision(scene, WALL_ELASTICITY, scene_get_body(scene, BALL_NUMBER_IN_SCENE), scene_get_body(scene, i));
+        if (i != 10 && i != 12) {create_physics_collision(scene, WALL_ELASTICITY, scene_get_body(scene, i), scene_get_body(scene, BALL_NUMBER_IN_SCENE)); }
         for (size_t j = 0; j < 4; j++) {
             create_physics_collision(scene, WALL_ELASTICITY, scene_get_body(scene, j), scene_get_body(scene, i));
         }
     }
+    //add normal force to top of goals
+    create_normal_force(scene, scene_get_body(scene, BALL_NUMBER_IN_SCENE), scene_get_body(scene, 10));
+    create_normal_force(scene, scene_get_body(scene, BALL_NUMBER_IN_SCENE), scene_get_body(scene, 12));
 
     while (!sdl_is_done(scene)) {
         double dt = time_since_last_tick();

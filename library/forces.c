@@ -161,7 +161,7 @@ void handler_physics_one_collision(body_t *body1, body_t *body2, vector_t axis, 
         }
     }
     if (body_get_mass(body1) == INFINITY && body_get_mass(body2) == INFINITY) {impulse = 0;}
-    body_add_impulse(body2, (vector_t) vec_multiply(-3*impulse, axis));
+    body_add_impulse(body2, (vector_t) vec_multiply(-2*impulse, axis));
 } 
 
 void force_creator_collision(void *aux) {
