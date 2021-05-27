@@ -17,6 +17,7 @@ const vector_t MAX_POINT = {WINDOW_WIDTH_, WINDOW_HEIGHT_};
 const double RIGHT_VELOCITY = 200;
 const double LEFT_VELOCITY = -200;
 const double JUMP_VELOCITY = 200;
+const double VELOCITY = 200;
 
 const double GAMMA = 2.5;
 const vector_t GRAVITY = {0, -350};
@@ -27,17 +28,17 @@ const size_t FLOOR_NUMBER = 8;
 
 const double LEG_ROTATION_SPEED = 8;
 const double PLAYER_RADIUS = 25;
-const double PLAYER1_ANGLE = 19*M_PI/12;
-const double PLAYER2_ANGLE = 5*M_PI/12;
+const double PLAYER1_ANGLE = -M_PI/5;
+const double PLAYER2_ANGLE = M_PI/5;
 const vector_t PLAYER1_BODY_SPAWN = {200, 88};
 const vector_t PLAYER2_BODY_SPAWN = {800, 88};
-const vector_t PLAYER1_LEG_SPAWN = {200, 35};
-const vector_t PLAYER2_LEG_SPAWN = {780, 35};
+const vector_t PLAYER1_LEG_SPAWN = {220, 88};
+const vector_t PLAYER2_LEG_SPAWN = {780, 88};
 const double PLAYER_MAJOR_AXIS = 1;
 const double PLAYER_MINOR_AXIS = 1.5;
-const vector_t PLAYER1_LEG_TOP_RIGHT = {200, 30};
+const vector_t PLAYER1_LEG_TOP_LEFT = {215, 92};
 const vector_t PLAYER2_LEG_TOP_RIGHT = {800, 30};
-const size_t LEG_SCALING = 3;
+const double LEG_SCALING = 3.5;
 
 const double CIRCLE_POINTS = 40;
 const double CIRCLE_MASS = 1;
@@ -73,7 +74,7 @@ void on_key_player(char key, key_event_type_t type, void *scene) {
     body_t *body1 = scene_get_body((scene_t*)scene, 2);
     body_t *leg1 = scene_get_body((scene_t*)scene, 3);
     body_set_rotation_speed(leg1, 0);
-    body_set_rotation(leg1, PLAYER1_ANGLE);
+    body_set_rotation(leg1, M_PI/5);
     if (type == KEY_PRESSED) {
         switch (key) {
             case LEFT_ARROW:
@@ -102,7 +103,7 @@ void on_key_player(char key, key_event_type_t type, void *scene) {
                 }
             case SDLK_COMMA:
                 if (true == true) {
-                    body_set_rotation_speed(leg1, -LEG_ROTATION_SPEED);
+                    body_set_rotation(leg1, -M_PI / 3);
                     break;
                 }
         }
@@ -140,7 +141,7 @@ void on_key_player(char key, key_event_type_t type, void *scene) {
     body_t *body2 = scene_get_body((scene_t*)scene, 0);
     body_t *leg2 = scene_get_body((scene_t*)scene, 1);
     body_set_rotation_speed(leg2, 0);
-    body_set_rotation(leg2, PLAYER2_ANGLE);    
+    body_set_rotation(leg2, - M_PI / 5);    
     if (type == KEY_PRESSED) {
         switch (key) {
             case SDLK_d:
@@ -169,7 +170,7 @@ void on_key_player(char key, key_event_type_t type, void *scene) {
                 }
             case SDLK_c:
                 if (true == true){
-                    body_set_rotation_speed(leg2, -LEG_ROTATION_SPEED);
+                    body_set_rotation(leg2, M_PI / 3);
                     break;
                 }
         }
@@ -296,7 +297,7 @@ body_t *make_oval(rgb_color_t *color, double radius, double x_scalar, double y_s
     return body_init(c, INFINITY, *color);
 }
 
-void make_p2_leg(scene_t *scene, rgb_color_t *color, vector_t spawn, vector_t top_right){
+body_t *make_p2_leg(scene_t *scene, rgb_color_t *color, vector_t spawn, vector_t top_right){
     list_t *leg = list_init(5, free);
     
     vector_t *v = malloc(sizeof(*v));
@@ -336,9 +337,10 @@ void make_p2_leg(scene_t *scene, rgb_color_t *color, vector_t spawn, vector_t to
     body_set_rotation(body, PLAYER2_ANGLE);
     body_set_centroid(body, spawn);
     scene_add_body(scene, body);
+    return body;
 }
 
-void make_p1_leg(scene_t *scene, rgb_color_t *color, vector_t spawn, vector_t top_left){
+body_t *make_p1_leg(scene_t *scene, rgb_color_t *color, vector_t spawn, vector_t top_left){
     
     list_t *leg = list_init(5, free);
     
@@ -349,36 +351,40 @@ void make_p1_leg(scene_t *scene, rgb_color_t *color, vector_t spawn, vector_t to
     v->y = top_left.y;
 
     list_add(leg, v);
-
+    
     v = malloc(sizeof(*v));
-    curr_x += LEG_SCALING * 5;
+    curr_y -= LEG_SCALING * 10;
+    v->x = curr_x;
+    v->y = curr_y;
+    list_add(leg, v);
+    
+    v = malloc(sizeof(*v));
+    curr_x += LEG_SCALING * 10;
     v->x = curr_x;
     v->y = curr_y;
     list_add(leg, v);
 
     v = malloc(sizeof(*v));
-    curr_y -= LEG_SCALING * 7;
+    curr_x -= LEG_SCALING * 5;
+    curr_y += LEG_SCALING * 3;
     v->x = curr_x;
     v->y = curr_y;
     list_add(leg, v);
 
+    
     v = malloc(sizeof(*v));
-    curr_x += LEG_SCALING * 5;
-    curr_y -= LEG_SCALING * 3;
+    curr_y += LEG_SCALING * 7;
     v->x = curr_x;
     v->y = curr_y;
     list_add(leg, v);
 
-    v = malloc(sizeof(*v));
-    curr_x -= LEG_SCALING * 10;
-    v->x = curr_x;
-    v->y = curr_y;
-    list_add(leg, v);
+    
     
     body_t *body = body_init(leg, 1, *color);
     body_set_rotation(body, PLAYER1_ANGLE);
     body_set_centroid(body, spawn);
     scene_add_body(scene, body);
+    return body;
 }
 
 body_t *make_player_body(scene_t *scene, rgb_color_t *color, vector_t spawn) {
@@ -413,17 +419,38 @@ void check_edge(scene_t *scene) {
     }
 }
 
-bool check_goal(body_t *ball) {
+bool check_goal(body_t *ball, player_t *p1, player_t *p2) {
     double y_lim = (WINDOW_HEIGHT_/8 - 22) + (WINDOW_HEIGHT_/4 - 20) - 2 * 10;
     double x_left = 60 + 25;
     double x_right = 940 - 25;
     vector_t centroid = body_get_centroid(ball);
-    if (centroid.x + BALL_RADIUS <= x_left || centroid.x - BALL_RADIUS >= x_right) {
-        if (centroid.y + BALL_RADIUS <= y_lim) {
+    if (centroid.y + BALL_RADIUS <= y_lim) {
+        if (centroid.x + BALL_RADIUS <= x_left) {
+            p2->score++;
+            return true;
+        }
+        if (centroid.x - BALL_RADIUS >= x_right) {
+            p1->score++;
             return true;
         }
     }
     return false;
+}
+
+void reset_scene(scene_t *scene, player_t *player1, player_t *player2){
+    body_t *p1_body = player1->body;
+    body_t *p1_leg = player1->leg;
+    body_t *p2_body = player2->body;
+    body_t *p2_leg = player2->leg;
+    body_t *ball = scene_get_body(scene, BALL_NUMBER_IN_SCENE);
+    if (check_goal(ball, player1, player2)) {
+        body_set_centroid(p1_body, PLAYER1_BODY_SPAWN);
+        body_set_centroid(p1_leg, PLAYER1_LEG_SPAWN);
+        body_set_centroid(p2_body, PLAYER2_BODY_SPAWN);
+        body_set_centroid(p2_leg, PLAYER2_LEG_SPAWN);
+        body_set_centroid(ball, BALL_SPAWN);
+        body_set_velocity(ball, VEC_ZERO);
+    }
 }
 
 int main() {
@@ -435,20 +462,23 @@ int main() {
 
     scene_t *scene = scene_init();
 
-    make_player_body(scene, GREEN, PLAYER1_BODY_SPAWN); //0
-    make_p1_leg(scene, BLACK, PLAYER1_LEG_SPAWN, PLAYER1_LEG_TOP_RIGHT); //1
-    make_player_body(scene, BLUE, PLAYER2_BODY_SPAWN); //2
-    make_p2_leg(scene, BLACK, PLAYER2_LEG_SPAWN, PLAYER2_LEG_TOP_RIGHT); //3
+    body_t *p1_body = make_player_body(scene, GREEN, PLAYER1_BODY_SPAWN); //0
+    body_t *p1_leg = make_p1_leg(scene, BLACK, PLAYER1_LEG_SPAWN, PLAYER1_LEG_TOP_LEFT); //1
+    body_t *p2_body = make_player_body(scene, BLUE, PLAYER2_BODY_SPAWN); //2
+    body_t *p2_leg = make_p2_leg(scene, BLACK, PLAYER2_LEG_SPAWN, PLAYER2_LEG_TOP_RIGHT); //3
 
-    make_ball(scene, BALL_RADIUS); //4
+    body_t *ball = make_ball(scene, BALL_RADIUS); //4
 
     make_walls(scene); //5,6,7,8
     make_goals(scene); //9,10,11,12
 
+    player_t *player1 = player_init(p1_body, p1_leg, 0, 0, 0);
+    player_t *player2 = player_init(p2_body, p2_leg, 0, 0, 0);
+
     sdl_on_key((key_handler_t) on_key_player);
 
     //add drag to ball so it doesn't accelerate
-    create_drag(scene, GAMMA, scene_get_body(scene, BALL_NUMBER_IN_SCENE));
+    create_drag(scene, GAMMA, ball);
     //add gravity to ball and players
     for (size_t i = 0; i < 5; i++) { 
         create_planet_gravity(scene, GRAVITY, scene_get_body(scene, i));
@@ -456,12 +486,12 @@ int main() {
     }
     //add physics collisions between players and ball
     for (size_t i = 0; i < 4; i++) { 
-        create_physics_one_collision(scene, PLAYER_ELASTICITY, scene_get_body(scene, i), scene_get_body(scene, BALL_NUMBER_IN_SCENE));
+        create_physics_one_collision(scene, PLAYER_ELASTICITY, scene_get_body(scene, i), ball);
     }
     //add physics collisions between the ball and the walls
     //add physics collisions between players and walls
     for (size_t i = 5; i < scene_bodies(scene); i++) { 
-        create_physics_one_collision(scene, WALL_ELASTICITY, scene_get_body(scene, i), scene_get_body(scene, BALL_NUMBER_IN_SCENE));
+        create_physics_one_collision(scene, WALL_ELASTICITY, scene_get_body(scene, i), ball);
         for (size_t j = 0; j < 4; j++) {
             create_physics_collision(scene, WALL_ELASTICITY, scene_get_body(scene, j), scene_get_body(scene, i));
         }
@@ -474,9 +504,11 @@ int main() {
         double dt = time_since_last_tick();
         check_edge(scene);
         scene_tick(scene, dt);
-        check_goal(scene_get_body(scene, BALL_NUMBER_IN_SCENE));
+        reset_scene(scene, player1, player2);
         sdl_render_scene(scene);
     }
     scene_free(scene);
+    free(player1);
+    free(player2);
     return 0;
 }
