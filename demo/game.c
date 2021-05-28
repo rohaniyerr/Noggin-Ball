@@ -19,9 +19,10 @@ const double LEFT_VELOCITY = -200;
 const double JUMP_VELOCITY = 200;
 const double VELOCITY = 200;
 
-const double GAMMA = 2.5;
-const vector_t GRAVITY = {0, -350};
-const double WALL_ELASTICITY = 0.05;
+const double GAMMA = 2;
+const vector_t GRAVITY = {0, -200};
+const vector_t PLAYER_GRAVITY = {0, -500};
+const double WALL_ELASTICITY = 0.15;
 const double PLAYER_ELASTICITY = 0.4;
 const size_t BALL_NUMBER_IN_SCENE = 4;
 const size_t FLOOR_NUMBER = 8;
@@ -38,12 +39,13 @@ const double PLAYER_MAJOR_AXIS = 1;
 const double PLAYER_MINOR_AXIS = 1.5;
 const vector_t PLAYER1_LEG_TOP_LEFT = {215, 92};
 const vector_t PLAYER2_LEG_TOP_RIGHT = {800, 30};
-const double LEG_SCALING = 3.5;
+const double LEG_SCALING = 5;
 
 const double CIRCLE_POINTS = 40;
 const double CIRCLE_MASS = 1;
 const double BALL_RADIUS = 15;
-const vector_t BALL_SPAWN = {WINDOW_WIDTH_/2 , WINDOW_HEIGHT_/2};
+const vector_t BALL_SPAWN = {WINDOW_WIDTH_/2 , 400};
+double BALL_MAX_VELOCITY = 10000;
 
 typedef struct player {
     body_t *body;
@@ -113,30 +115,6 @@ void on_key_player(char key, key_event_type_t type, void *scene) {
         body_set_velocity(body1, NO_X2);
         body_set_velocity(leg1, NO_X2);
     }
-    // else if (type == KEY_RELEASED) {
-    //     switch (key) {
-    //         case SDLK_COMMA:
-    //             if (true == true) {
-    //                 body_set_rotation_speed(leg1, 0);
-    //                 body_set_rotation(leg1, PLAYER1_ANGLE);
-    //                 break;
-    //             }
-    //         case LEFT_ARROW:
-    //             if (true == true) {
-    //                 vector_t NO_X2 = {.x = 0, .y = body_get_velocity(body1).y};
-    //                 body_set_velocity(body1, NO_X2);
-    //                 body_set_velocity(leg1, NO_X2);
-    //                 break;
-    //             }
-    //         case RIGHT_ARROW:
-    //             if (true == true) {
-    //                 vector_t NO_X2 = {.x = 0, .y = body_get_velocity(body1).y};
-    //                 body_set_velocity(body1, NO_X2);
-    //                 body_set_velocity(leg1, NO_X2);
-    //                 break;
-    //             }
-    //     }
-    // }
 
     body_t *body2 = scene_get_body((scene_t*)scene, 0);
     body_t *leg2 = scene_get_body((scene_t*)scene, 1);
@@ -309,7 +287,7 @@ body_t *make_p2_leg(scene_t *scene, rgb_color_t *color, vector_t spawn, vector_t
     list_add(leg, v);
 
     v = malloc(sizeof(*v));
-    curr_x -= LEG_SCALING * 5;
+    curr_x -= LEG_SCALING * 4;
     v->x = curr_x;
     v->y = curr_y;
     list_add(leg, v);
@@ -359,13 +337,13 @@ body_t *make_p1_leg(scene_t *scene, rgb_color_t *color, vector_t spawn, vector_t
     list_add(leg, v);
     
     v = malloc(sizeof(*v));
-    curr_x += LEG_SCALING * 10;
+    curr_x += LEG_SCALING * 9;
     v->x = curr_x;
     v->y = curr_y;
     list_add(leg, v);
 
     v = malloc(sizeof(*v));
-    curr_x -= LEG_SCALING * 5;
+    curr_x -= LEG_SCALING * 4;
     curr_y += LEG_SCALING * 3;
     v->x = curr_x;
     v->y = curr_y;
@@ -453,6 +431,12 @@ void reset_scene(scene_t *scene, player_t *player1, player_t *player2){
     }
 }
 
+void ball_too_fast(body_t *body) {
+    if (vec_magnitude(body_get_velocity(body)) > BALL_MAX_VELOCITY) {
+        body_set_velocity(body, vec_multiply(.5, body_get_velocity(body)));
+    }
+}
+
 int main() {
     sdl_init(MIN_POINT, MAX_POINT);
     
@@ -481,7 +465,8 @@ int main() {
     create_drag(scene, GAMMA, ball);
     //add gravity to ball and players
     for (size_t i = 0; i < 5; i++) { 
-        create_planet_gravity(scene, GRAVITY, scene_get_body(scene, i));
+        if (i == 4) {create_planet_gravity(scene, GRAVITY, scene_get_body(scene, i)); }
+        else {create_planet_gravity(scene, PLAYER_GRAVITY, scene_get_body(scene, i)); }
         create_normal_force(scene, scene_get_body(scene, i), scene_get_body(scene, FLOOR_NUMBER));
     }
     //add physics collisions between players and ball
@@ -493,7 +478,7 @@ int main() {
     for (size_t i = 5; i < scene_bodies(scene); i++) { 
         create_physics_one_collision(scene, WALL_ELASTICITY, scene_get_body(scene, i), ball);
         for (size_t j = 0; j < 4; j++) {
-            create_physics_collision(scene, WALL_ELASTICITY, scene_get_body(scene, j), scene_get_body(scene, i));
+            if (j % 2 == 0 || i == FLOOR_NUMBER) {create_physics_collision(scene, WALL_ELASTICITY, scene_get_body(scene, j), scene_get_body(scene, i)); }
         }
     }
     //add normal force to top of goals
@@ -503,6 +488,7 @@ int main() {
     while (!sdl_is_done(scene)) {
         double dt = time_since_last_tick();
         check_edge(scene);
+        ball_too_fast(scene_get_body(scene, BALL_NUMBER_IN_SCENE));
         scene_tick(scene, dt);
         reset_scene(scene, player1, player2);
         sdl_render_scene(scene);
