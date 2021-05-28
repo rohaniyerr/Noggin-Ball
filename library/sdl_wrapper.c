@@ -230,7 +230,8 @@ void sdl_draw_polygon_body(body_t *body, rgb_color_t color) { // changed this to
     double scale = x_scale < y_scale ? x_scale : y_scale;
 
     // Convert each vertex to a point on screen
-    short *x_points = malloc(sizeof(short) * n), *y_points = malloc(sizeof(short) * n); //idk i just stack overflowed this
+    short *x_points = malloc(sizeof(short) * n);
+    short *y_points = malloc(sizeof(short) * n); //idk i just stack overflowed this
     // assert(x_points);
     // assert(y_points);
     vector_t new_center = center;

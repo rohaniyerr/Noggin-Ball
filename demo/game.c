@@ -32,19 +32,19 @@ const double LEG_ROTATION_SPEED = 8;
 const double PLAYER_RADIUS = 45;
 const double PLAYER1_ANGLE = -M_PI/5;
 const double PLAYER2_ANGLE = M_PI/5;
-const vector_t PLAYER1_BODY_SPAWN = {200, 88};
-const vector_t PLAYER2_BODY_SPAWN = {800, 88};
-const vector_t PLAYER1_LEG_SPAWN = {220, 88};
-const vector_t PLAYER2_LEG_SPAWN = {780, 88};
+const vector_t PLAYER1_BODY_SPAWN = {200, 70};
+const vector_t PLAYER2_BODY_SPAWN = {800, 70};
+const vector_t PLAYER1_LEG_SPAWN = {240, 70};
+const vector_t PLAYER2_LEG_SPAWN = {760, 70};
 const double PLAYER_MAJOR_AXIS = 1;
 const double PLAYER_MINOR_AXIS = 1.5;
 const vector_t PLAYER1_LEG_TOP_LEFT = {215, 92};
 const vector_t PLAYER2_LEG_TOP_RIGHT = {800, 30};
-const double LEG_SCALING = 5;
+const double LEG_SCALING = 3.5;
 
 const double CIRCLE_POINTS = 40;
 const double CIRCLE_MASS = 1;
-const double BALL_RADIUS = 15;
+const double BALL_RADIUS = 25;
 const vector_t BALL_SPAWN = {WINDOW_WIDTH_/2 , 400};
 double BALL_MAX_VELOCITY = 10000;
 
@@ -317,8 +317,8 @@ body_t *make_p2_leg(scene_t *scene, rgb_color_t *color, vector_t spawn, vector_t
     body_t *body = body_init(leg, 1, *color);
     body_set_rotation(body, PLAYER2_ANGLE);
     body_set_centroid(body, spawn);
-    body_set_radius(body, 25);
-    body_set_image(body, "images/leg2.png");
+    // body_set_radius(body, 25);
+    // body_set_image(body, "images/leg2.png");
     scene_add_body(scene, body);
     return body;
 }
@@ -366,8 +366,8 @@ body_t *make_p1_leg(scene_t *scene, rgb_color_t *color, vector_t spawn, vector_t
     body_t *body = body_init(leg, 1, *color);
     body_set_rotation(body, PLAYER1_ANGLE);
     body_set_centroid(body, spawn);
-    body_set_radius(body, 25);
-    body_set_image(body, "images/leg1.png");
+    // body_set_radius(body, 25);
+    // body_set_image(body, "images/leg1.png");
     scene_add_body(scene, body);
     return body;
 }
@@ -378,7 +378,7 @@ body_t *make_player_body(scene_t *scene, rgb_color_t *color, vector_t spawn) {
     body_set_centroid(player_body, spawn);
     body_set_mass(player_body, 1);
     body_set_radius(player_body, PLAYER_RADIUS);
-    body_set_image(player_body, "images/derek.png");
+    body_set_image(player_body, "images/riiyer.png");
     scene_add_body(scene, player_body);
     return player_body;
 }
