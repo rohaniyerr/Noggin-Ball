@@ -5,6 +5,10 @@
 #include "color.h"
 #include "list.h"
 #include "vector.h"
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
+#include <stdio.h>
 
 /**
  * A rigid body constrained to the plane.
@@ -39,6 +43,7 @@ body_t *body_init_with_info(
     rgb_color_t color,
     void *info,
     free_func_t info_freer
+
 );
 
 /**
@@ -194,5 +199,23 @@ double body_get_rotation(body_t *body);
 vector_t body_get_impulse(body_t *body);
 
 vector_t body_get_force(body_t *body);
+
+void body_set_texture(body_t *body, SDL_Texture *texture);
+
+/**
+ * Returns the texture of a body.
+ */
+SDL_Texture *body_get_texture(body_t *body);
+
+void body_set_image(body_t *body, const char *filename);
+
+/**
+ * Returns the image of a body.
+ */
+SDL_Surface *body_get_image(body_t *body);
+
+double body_get_radius(body_t *body);
+
+void body_set_radius(body_t *body, double radius);
 
 #endif // #ifndef __BODY_H__

@@ -8,6 +8,9 @@ typedef struct scene{
     size_t size;
     size_t capacity;
     list_t *force_creator_list;
+    list_t *textures;
+    SDL_Texture *bkg;
+    SDL_Surface *bkg_image;
 } scene_t;
 
 typedef struct forcer {
@@ -31,7 +34,9 @@ scene_t *scene_init(void) {
     scene->size = 0;
     scene->capacity = guess;
     scene->force_creator_list = list_init(1, free);
-
+    scene->textures = list_init(1, free);
+    scene->bkg = NULL;
+    scene->bkg_image = NULL;
     assert(scene != NULL);
     assert(scene->bodies != NULL);
     return scene;
@@ -50,6 +55,22 @@ void scene_free(scene_t *scene) {
     free(scene);
 }
 
+void scene_set_bkg(scene_t *scene, SDL_Texture *texture) {
+  scene->bkg = texture;
+}
+
+SDL_Texture *scene_get_bkg(scene_t *scene) {
+  return scene->bkg;
+}
+
+void scene_set_bkg_image(scene_t *scene, const char *filename) {
+  SDL_Surface *image = IMG_Load(filename);
+  scene->bkg_image = image;
+}
+
+SDL_Surface *scene_get_bkg_image(scene_t *scene) {
+  return scene->bkg_image;
+}
 
 size_t scene_bodies(scene_t *scene) {
     return scene->size;
@@ -121,4 +142,12 @@ void scene_add_force_creator(scene_t *scene, force_creator_t forcer, void *aux, 
     list_t *bodies = list_init(0, (free_func_t) free);
     forcer_t *force = forcer_t_init(forcer, aux, freer, bodies);
     list_add(scene->force_creator_list, force);
+}
+
+list_t *scene_textures_list(scene_t *scene) {
+  return scene->textures;
+}
+
+void scene_add_texture(scene_t *scene, SDL_Texture *texture) {
+  list_add(scene->textures, texture);
 }

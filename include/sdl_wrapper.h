@@ -120,4 +120,10 @@ void sdl_on_key(key_handler_t handler);
  */
 double time_since_last_tick(void);
 
+void make_SDL_image(void);
+
+void sdl_init_textures(scene_t *s);
+
+void sdl_draw_polygon_body(body_t *body, rgb_color_t color);
+
 #endif // #ifndef __SDL_WRAPPER_H__

@@ -15,10 +15,13 @@ typedef struct body {
     vector_t impulse;
     vector_t centroid;
     double rotation_speed;
+    SDL_Texture *texture;
+    SDL_Surface *image;
     double rotation;
     void *info;
     free_func_t info_freer;
     bool remove;
+    double radius;
 } body_t;
 
 body_t *body_init(list_t *shape, double mass, rgb_color_t color) {
@@ -40,11 +43,16 @@ body_t *body_init_with_info(list_t *shape, double mass, rgb_color_t color, void 
     body->info = info;
     body->info_freer = (free_func_t) info_freer;
     body->remove = false;
+    body->image = NULL;
+    body->texture = NULL;
+    body->radius = 0;
     return body;
 }
 
+
 void body_free(body_t *body){
     list_free(body->shape);
+    SDL_FreeSurface(body->image);
     free_func_t info_freer = (free_func_t) body->info_freer;
     if (info_freer != NULL) {
         info_freer(body->info);
@@ -158,4 +166,29 @@ vector_t body_get_force(body_t *body) {
 
 vector_t body_get_impulse(body_t *body) {
     return body->impulse;
+}
+
+void body_set_image(body_t *body, const char *filename) {
+  SDL_Surface *image = IMG_Load(filename);
+  body->image = image;
+}
+
+SDL_Surface *body_get_image(body_t *body) {
+  return body->image;
+}
+
+void body_set_texture(body_t *body, SDL_Texture *texture) {
+  body->texture = texture;
+}
+
+SDL_Texture *body_get_texture(body_t *body) {
+  return body->texture;
+}
+
+double body_get_radius(body_t *body) {
+  return body->radius;
+}
+
+void body_set_radius(body_t *body, double radius) {
+  body->radius = radius;
 }

@@ -5,6 +5,11 @@
 #include "list.h"
 #include <assert.h>
 #include <stdlib.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
+#include <stdio.h>
+// #include <SDL2/SDL_image.h>
 
 /**
  * A collection of bodies and force creators.
@@ -123,5 +128,32 @@ void scene_add_bodies_force_creator(
  * @param dt the time elapsed since the last tick, in seconds
  */
 void scene_tick(scene_t *scene, double dt);
+
+void scene_set_bkg(scene_t *scene, SDL_Texture *texture);
+
+/**
+ * Returns the background texture of the scene.
+ */
+SDL_Texture *scene_get_bkg(scene_t *scene);
+
+/**
+ * Sets the scene background image to an SDL_Surface.
+ *
+ * @param scene the scene to be set
+ * @param filename the filename to read the image from
+ */
+void scene_set_bkg_image(scene_t *scene, const char *filename);
+
+/**
+ * Returns the background surface of the scene.
+ */
+SDL_Surface *scene_get_bkg_image(scene_t *scene);
+
+void scene_add_texture(scene_t *scene, SDL_Texture *texture);
+
+/**
+ * Returns the list of scene textures.
+ */
+list_t *scene_textures_list(scene_t *scene);
 
 #endif // #ifndef __SCENE_H__

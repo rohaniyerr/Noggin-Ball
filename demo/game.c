@@ -1,4 +1,3 @@
-#include "sdl_wrapper.h"
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -8,6 +7,8 @@
 #include "forces.h"
 #include "polygon.h"
 #include "SDL2/SDL.h"
+#include <SDL2/SDL_image.h>
+#include "sdl_wrapper.h"
 
 const size_t WINDOW_WIDTH_ = 1000;
 const size_t WINDOW_HEIGHT_ = 500;
@@ -27,7 +28,7 @@ const size_t BALL_NUMBER_IN_SCENE = 4;
 const size_t FLOOR_NUMBER = 8;
 
 const double LEG_ROTATION_SPEED = 8;
-const double PLAYER_RADIUS = 25;
+const double PLAYER_RADIUS = 45;
 const double PLAYER1_ANGLE = -M_PI/5;
 const double PLAYER2_ANGLE = M_PI/5;
 const vector_t PLAYER1_BODY_SPAWN = {200, 88};
@@ -282,6 +283,8 @@ body_t *make_ball(scene_t *scene, double radius) {
     body_t *ball = body_init(circ, CIRCLE_MASS, choose_rand_color());
     body_set_centroid(ball, BALL_SPAWN);
     body_set_mass(ball, 1);
+    body_set_radius(ball, BALL_RADIUS);
+    body_set_image(ball, "images/ball.png");
     scene_add_body(scene, ball);
     return ball;
 }
@@ -309,7 +312,7 @@ body_t *make_p2_leg(scene_t *scene, rgb_color_t *color, vector_t spawn, vector_t
     list_add(leg, v);
 
     v = malloc(sizeof(*v));
-    curr_x -= LEG_SCALING * 5;
+    curr_x -= LEG_SCALING * 4;
     v->x = curr_x;
     v->y = curr_y;
     list_add(leg, v);
@@ -336,6 +339,8 @@ body_t *make_p2_leg(scene_t *scene, rgb_color_t *color, vector_t spawn, vector_t
     body_t *body = body_init(leg, 1, *color);
     body_set_rotation(body, PLAYER2_ANGLE);
     body_set_centroid(body, spawn);
+    body_set_radius(body, 25);
+    body_set_image(body, "images/leg2.png");
     scene_add_body(scene, body);
     return body;
 }
@@ -359,13 +364,13 @@ body_t *make_p1_leg(scene_t *scene, rgb_color_t *color, vector_t spawn, vector_t
     list_add(leg, v);
     
     v = malloc(sizeof(*v));
-    curr_x += LEG_SCALING * 10;
+    curr_x += LEG_SCALING * 9;
     v->x = curr_x;
     v->y = curr_y;
     list_add(leg, v);
 
     v = malloc(sizeof(*v));
-    curr_x -= LEG_SCALING * 5;
+    curr_x -= LEG_SCALING * 4;
     curr_y += LEG_SCALING * 3;
     v->x = curr_x;
     v->y = curr_y;
@@ -383,6 +388,8 @@ body_t *make_p1_leg(scene_t *scene, rgb_color_t *color, vector_t spawn, vector_t
     body_t *body = body_init(leg, 1, *color);
     body_set_rotation(body, PLAYER1_ANGLE);
     body_set_centroid(body, spawn);
+    body_set_radius(body, 25);
+    body_set_image(body, "images/leg1.png");
     scene_add_body(scene, body);
     return body;
 }
@@ -392,6 +399,8 @@ body_t *make_player_body(scene_t *scene, rgb_color_t *color, vector_t spawn) {
     body_set_color(player_body, color);
     body_set_centroid(player_body, spawn);
     body_set_mass(player_body, 1);
+    body_set_radius(player_body, PLAYER_RADIUS);
+    body_set_image(player_body, "images/derek.png");
     scene_add_body(scene, player_body);
     return player_body;
 }
@@ -455,22 +464,24 @@ void reset_scene(scene_t *scene, player_t *player1, player_t *player2){
 
 int main() {
     sdl_init(MIN_POINT, MAX_POINT);
+    scene_t *soccer_scene = scene_init();
+    
+    scene_set_bkg_image(soccer_scene, "images/stadium.png");
     
     rgb_color_t *GREEN = rgb_color_init(0,1,0);
     rgb_color_t *BLUE = rgb_color_init(0,0,1);
     rgb_color_t *BLACK = rgb_color_init(0,0,0);
 
-    scene_t *scene = scene_init();
 
-    body_t *p1_body = make_player_body(scene, GREEN, PLAYER1_BODY_SPAWN); //0
-    body_t *p1_leg = make_p1_leg(scene, BLACK, PLAYER1_LEG_SPAWN, PLAYER1_LEG_TOP_LEFT); //1
-    body_t *p2_body = make_player_body(scene, BLUE, PLAYER2_BODY_SPAWN); //2
-    body_t *p2_leg = make_p2_leg(scene, BLACK, PLAYER2_LEG_SPAWN, PLAYER2_LEG_TOP_RIGHT); //3
+    body_t *p1_body = make_player_body(soccer_scene, GREEN, PLAYER1_BODY_SPAWN); //0
+    body_t *p1_leg = make_p1_leg(soccer_scene, BLACK, PLAYER1_LEG_SPAWN, PLAYER1_LEG_TOP_LEFT); //1
+    body_t *p2_body = make_player_body(soccer_scene, BLUE, PLAYER2_BODY_SPAWN); //2
+    body_t *p2_leg = make_p2_leg(soccer_scene, BLACK, PLAYER2_LEG_SPAWN, PLAYER2_LEG_TOP_RIGHT); //3
 
-    body_t *ball = make_ball(scene, BALL_RADIUS); //4
+    body_t *ball = make_ball(soccer_scene, BALL_RADIUS); //4
 
-    make_walls(scene); //5,6,7,8
-    make_goals(scene); //9,10,11,12
+    make_walls(soccer_scene); //5,6,7,8
+    make_goals(soccer_scene); //9,10,11,12
 
     player_t *player1 = player_init(p1_body, p1_leg, 0, 0, 0);
     player_t *player2 = player_init(p2_body, p2_leg, 0, 0, 0);
@@ -478,33 +489,35 @@ int main() {
     sdl_on_key((key_handler_t) on_key_player);
 
     //add drag to ball so it doesn't accelerate
-    create_drag(scene, GAMMA, ball);
+    create_drag(soccer_scene, GAMMA, ball);
     //add gravity to ball and players
     for (size_t i = 0; i < 5; i++) { 
-        create_planet_gravity(scene, GRAVITY, scene_get_body(scene, i));
-        create_normal_force(scene, scene_get_body(scene, i), scene_get_body(scene, FLOOR_NUMBER));
+        create_planet_gravity(soccer_scene, GRAVITY, scene_get_body(soccer_scene, i));
+        create_normal_force(soccer_scene, scene_get_body(soccer_scene, i), scene_get_body(soccer_scene, FLOOR_NUMBER));
     }
     //add physics collisions between players and ball
     for (size_t i = 0; i < 4; i++) { 
-        create_physics_one_collision(scene, PLAYER_ELASTICITY, scene_get_body(scene, i), ball);
+        create_physics_one_collision(soccer_scene, PLAYER_ELASTICITY, scene_get_body(soccer_scene, i), ball);
     }
     //add physics collisions between the ball and the walls
     //add physics collisions between players and walls
-    for (size_t i = 5; i < scene_bodies(scene); i++) { 
-        create_physics_one_collision(scene, WALL_ELASTICITY, scene_get_body(scene, i), ball);
+    for (size_t i = 5; i < scene_bodies(soccer_scene); i++) { 
+        create_physics_one_collision(soccer_scene, WALL_ELASTICITY, scene_get_body(soccer_scene, i), ball);
         for (size_t j = 0; j < 4; j++) {
-            create_physics_collision(scene, WALL_ELASTICITY, scene_get_body(scene, j), scene_get_body(scene, i));
+            create_physics_collision(soccer_scene, WALL_ELASTICITY, scene_get_body(soccer_scene, j), scene_get_body(soccer_scene, i));
         }
     }
+    make_SDL_image();
+    sdl_init_textures(soccer_scene);
 
-    while (!sdl_is_done(scene)) {
+    while (!sdl_is_done(soccer_scene)) {
+        sdl_render_scene(soccer_scene);
         double dt = time_since_last_tick();
-        check_edge(scene);
-        scene_tick(scene, dt);
-        reset_scene(scene, player1, player2);
-        sdl_render_scene(scene);
+        check_edge(soccer_scene);
+        scene_tick(soccer_scene, dt);
+        reset_scene(soccer_scene, player1, player2);
     }
-    scene_free(scene);
+    scene_free(soccer_scene);
     free(player1);
     free(player2);
     return 0;

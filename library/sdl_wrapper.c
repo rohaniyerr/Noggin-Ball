@@ -1,10 +1,13 @@
 #include <assert.h>
 #include <math.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <time.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL2_gfxPrimitives.h>
 #include "sdl_wrapper.h"
+#include "body.h"
+#include "polygon.h"
 
 const char WINDOW_TITLE[] = "CS 3";
 const int WINDOW_WIDTH = 1000;
@@ -41,6 +44,10 @@ uint32_t key_start_timestamp;
  * Initially 0.
  */
 clock_t last_clock = 0;
+
+bool is_SDL_image = false;
+
+double IMG_SCALE = 1.0;
 
 /** Computes the center of the window in pixel coordinates */
 vector_t get_window_center(void) {
@@ -154,6 +161,11 @@ void sdl_clear(void) {
     SDL_RenderClear(renderer);
 }
 
+vector_t change_coordinate(vector_t v, vector_t new_center, double center_x, double center_y, double scale) {
+    vector_t pos = vec_multiply(scale, vec_subtract(v, new_center));
+    return (vector_t){center_x + pos.x, center_y - pos.y};
+}
+
 void sdl_draw_polygon(list_t *points, rgb_color_t color) {
     // Check parameters
     size_t n = list_size(points);
@@ -186,13 +198,93 @@ void sdl_draw_polygon(list_t *points, rgb_color_t color) {
     free(y_points);
 }
 
+
+bool on_screen(vector_t v, double radius) {
+    if (v.x - radius > WINDOW_WIDTH)  return false;
+    if (v.x + radius < -WINDOW_WIDTH)   return false;
+    if (v.y - radius > WINDOW_HEIGHT) return false;
+    if (v.y + radius < -WINDOW_HEIGHT)  return false;
+    return true;
+}
+
+void sdl_draw_polygon_body(body_t *body, rgb_color_t color) { // changed this to take a body instead of list
+    list_t *points = body_get_shape(body);
+    // Check parameters
+    size_t n = list_size(points);
+    assert(n >= 3);
+    assert(0 <= color.r && color.r <= 1);
+    assert(0 <= color.g && color.g <= 1);
+    assert(0 <= color.b && color.b <= 1);
+
+    // Make the pic fit the scene
+    int *width = malloc(sizeof(int)),*height = malloc(sizeof(int));
+    // assert(width);
+    // assert(height);
+    SDL_GetWindowSize(window, width, height);
+    double center_x = *width / 2.0,
+           center_y = *height / 2.0;
+    free(width);
+    free(height);
+    double x_scale = center_x / max_diff.x,
+           y_scale = center_y / max_diff.y;
+    double scale = x_scale < y_scale ? x_scale : y_scale;
+
+    // Convert each vertex to a point on screen
+    short *x_points = malloc(sizeof(short) * n), *y_points = malloc(sizeof(short) * n); //idk i just stack overflowed this
+    // assert(x_points);
+    // assert(y_points);
+    vector_t new_center = center;
+
+    //make body if on screen
+    vector_t adjusted_centroid = polygon_centroid(points);
+    double radius = body_get_radius(body) * scale * sqrt(2); // pythag
+    vector_t pos = vec_multiply(scale, vec_subtract(adjusted_centroid, new_center));
+    if (!on_screen((vector_t){center_x + pos.x, center_y - pos.y}, radius)) {
+        return;
+    }
+    for (size_t i = 0; i < n; i++) {
+        vector_t *vertex = list_get(points, i);
+        vector_t point = change_coordinate(*vertex, new_center, center_x, center_y, scale);
+        x_points[i] = point.x;
+        y_points[i] = point.y;
+    }
+
+    if (!body_get_image(body) || !is_SDL_image) {
+        // Draw polygon with the given color
+        filledPolygonRGBA(
+            renderer,
+            x_points, y_points, n,
+            color.r * 255, color.g * 255, color.b * 255, 255
+        );
+        free(x_points);
+        free(y_points);
+        list_free(points);
+    }
+
+    else if (is_SDL_image) {
+        vector_t centroid = body_get_centroid(body);
+        SDL_Rect *dest = malloc(sizeof(SDL_Rect));
+        int radius = (int) body_get_radius(body);
+        vector_t corner = VEC_ZERO;
+        corner = (vector_t) {(centroid.x - radius), (centroid.y + radius)};
+        corner = change_coordinate(corner, new_center, center_x, center_y, scale);
+        dest->x = corner.x;
+        dest->y = corner.y;
+        dest->w = 2 * scale * radius * IMG_SCALE;
+        dest->h = 2 * scale * radius * IMG_SCALE;
+
+        // Initializes and renders texture from body->image.
+        SDL_Texture *texture = body_get_texture(body);
+        SDL_RenderCopy(renderer, texture, NULL, dest);
+        free(dest);
+    }
+}
+
 void sdl_show(void) {
     // Draw boundary lines
     vector_t window_center = get_window_center();
-    vector_t max = vec_add(center, max_diff),
-             min = vec_subtract(center, max_diff);
-    vector_t max_pixel = get_window_position(max, window_center),
-             min_pixel = get_window_position(min, window_center);
+    vector_t max = vec_add(center, max_diff), min = vec_subtract(center, max_diff);
+    vector_t max_pixel = get_window_position(max, window_center), min_pixel = get_window_position(min, window_center);
     SDL_Rect *boundary = malloc(sizeof(*boundary));
     boundary->x = min_pixel.x;
     boundary->y = max_pixel.y;
@@ -201,20 +293,56 @@ void sdl_show(void) {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderDrawRect(renderer, boundary);
     free(boundary);
-
     SDL_RenderPresent(renderer);
 }
 
 void sdl_render_scene(scene_t *scene) {
     sdl_clear();
+    if (is_SDL_image) {
+      SDL_Texture *bkg = scene_get_bkg(scene);
+      SDL_Rect *dest = malloc(sizeof(SDL_Rect));
+      dest->x = 0;
+      dest->y = 0;
+      dest->w = 1000;
+      dest->h = 1000;
+      SDL_RenderCopy(renderer, bkg, NULL, dest);
+      free(dest);
+    }
+
     size_t body_count = scene_bodies(scene);
     for (size_t i = 0; i < body_count; i++) {
         body_t *body = scene_get_body(scene, i);
-        list_t *shape = body_get_shape(body);
-        sdl_draw_polygon(shape, body_get_color(body));
-        list_free(shape);
+        vector_t original_body_position = body_get_centroid(body);
+        sdl_draw_polygon_body(body, body_get_color(body));
+        body_set_centroid(body, original_body_position);
     }
     sdl_show();
+}
+
+void sdl_init_textures(scene_t *s) {
+    int *width = malloc(sizeof(int)), *height = malloc(sizeof(int));
+    SDL_GetWindowSize(window, width, height);
+    double center_x = *width / 2.0, center_y = *height / 2.0;
+    double x_scale = center_x / max_diff.x, y_scale = center_y / max_diff.y;
+    double scale = x_scale < y_scale ? x_scale : y_scale;
+    if (scene_get_bkg_image(s)) {
+        SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, scene_get_bkg_image(s));
+        scene_set_bkg(s, texture);
+    }
+    for (int i = 0; i < scene_bodies(s); i ++) {
+        body_t *body = scene_get_body(s, i);
+        if (body_get_image(body)) {
+            SDL_Rect *dest = malloc(sizeof(SDL_Rect));
+            // Make texture.
+            SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, body_get_image(body));
+            body_set_texture(body, texture);
+            free(dest);
+        }
+    }
+}
+
+void make_SDL_image(void) {
+  is_SDL_image = !is_SDL_image;
 }
 
 void sdl_on_key(key_handler_t handler) {
