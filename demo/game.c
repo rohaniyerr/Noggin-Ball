@@ -19,8 +19,8 @@ const double LEFT_VELOCITY = -200;
 const double JUMP_VELOCITY = 200;
 const double VELOCITY = 200;
 
-const double GAMMA = 2.5;
-const vector_t GRAVITY = {0, -350};
+const double GAMMA = 2.2;
+const vector_t GRAVITY = {0, -300};
 const double WALL_ELASTICITY = 0.05;
 const double PLAYER_ELASTICITY = 0.4;
 const size_t BALL_NUMBER_IN_SCENE = 4;
@@ -43,7 +43,7 @@ const double LEG_SCALING = 3.5;
 const double CIRCLE_POINTS = 40;
 const double CIRCLE_MASS = 1;
 const double BALL_RADIUS = 15;
-const vector_t BALL_SPAWN = {WINDOW_WIDTH_/2 , WINDOW_HEIGHT_/2};
+const vector_t BALL_SPAWN = {WINDOW_WIDTH_/2 , 400};
 
 typedef struct player {
     body_t *body;
@@ -496,9 +496,6 @@ int main() {
             create_physics_collision(scene, WALL_ELASTICITY, scene_get_body(scene, j), scene_get_body(scene, i));
         }
     }
-    //add normal force to top of goals
-    // create_normal_force(scene, scene_get_body(scene, BALL_NUMBER_IN_SCENE), scene_get_body(scene, 10));
-    // create_normal_force(scene, scene_get_body(scene, BALL_NUMBER_IN_SCENE), scene_get_body(scene, 12));
 
     while (!sdl_is_done(scene)) {
         double dt = time_since_last_tick();
