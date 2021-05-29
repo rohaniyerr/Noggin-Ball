@@ -8,6 +8,8 @@
 #include "polygon.h"
 #include "SDL2/SDL.h"
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_mixer.h>
+
 #include "sdl_wrapper.h"
 
 const size_t WINDOW_WIDTH_ = 1000;
@@ -182,7 +184,7 @@ body_t *make_rectangle(int length, int height, vector_t spawn){
 }
 
 void make_walls(scene_t *scene) {
-    int size = 10;
+    int size = 5;
     vector_t spawn1 = {5, 2*WINDOW_HEIGHT_/3};
     body_t *wall1 = make_rectangle(size, 3*WINDOW_HEIGHT_/4, spawn1);
     body_set_mass(wall1, INFINITY);
@@ -210,27 +212,27 @@ void make_walls(scene_t *scene) {
 }
 
 void make_goals(scene_t *scene) {
-    rgb_color_t *BROWN = rgb_color_init(.6,.15,.15);
+    rgb_color_t *BROWN = rgb_color_init(1,1,1);
 
-    vector_t spawn_vert_1 = {25, WINDOW_HEIGHT_/8 - 22}; 
+    vector_t spawn_vert_1 = {20, WINDOW_HEIGHT_/8 - 22}; 
     body_t *vert_goal1 = make_rectangle(10, WINDOW_HEIGHT_/4 - 20, spawn_vert_1);
     body_set_color(vert_goal1, BROWN);
     body_set_mass(vert_goal1, INFINITY);
     scene_add_body(scene, vert_goal1);
     
-    vector_t spawn_hor_1 = {60, WINDOW_HEIGHT_/4 + 10};
+    vector_t spawn_hor_1 = {55, WINDOW_HEIGHT_/4 + 10};
     body_t *hor_goal1 = make_rectangle(25, 10, spawn_hor_1);
     body_set_color(hor_goal1, BROWN);
     body_set_mass(hor_goal1, INFINITY);
     scene_add_body(scene, hor_goal1);
 
-    vector_t spawn_vert_2 = {975, WINDOW_HEIGHT_/8 - 22}; 
+    vector_t spawn_vert_2 = {980, WINDOW_HEIGHT_/8 - 22}; 
     body_t *vert_goal2 = make_rectangle(10, WINDOW_HEIGHT_/4 - 20, spawn_vert_2);
     body_set_color(vert_goal2, BROWN);
     body_set_mass(vert_goal2, INFINITY);
     scene_add_body(scene, vert_goal2);
     
-    vector_t spawn_hor_2 = {940, WINDOW_HEIGHT_/4 + 10};
+    vector_t spawn_hor_2 = {945, WINDOW_HEIGHT_/4 + 10};
     body_t *hor_goal2 = make_rectangle(25, 10, spawn_hor_2);
     body_set_color(hor_goal2, BROWN);
     body_set_mass(hor_goal2, INFINITY);
@@ -372,13 +374,13 @@ body_t *make_p1_leg(scene_t *scene, rgb_color_t *color, vector_t spawn, vector_t
     return body;
 }
 
-body_t *make_player_body(scene_t *scene, rgb_color_t *color, vector_t spawn) {
+body_t *make_player_body(scene_t *scene, rgb_color_t *color, vector_t spawn, char *filename) {
     body_t *player_body = make_oval(color, PLAYER_RADIUS, PLAYER_MAJOR_AXIS, PLAYER_MINOR_AXIS);
     body_set_color(player_body, color);
     body_set_centroid(player_body, spawn);
     body_set_mass(player_body, 1);
     body_set_radius(player_body, PLAYER_RADIUS);
-    body_set_image(player_body, "images/riiyer.png");
+    body_set_image(player_body, filename);
     scene_add_body(scene, player_body);
     return player_body;
 }
@@ -457,9 +459,9 @@ int main() {
     rgb_color_t *BLACK = rgb_color_init(0,0,0);
 
 
-    body_t *p1_body = make_player_body(soccer_scene, GREEN, PLAYER1_BODY_SPAWN); //0
+    body_t *p1_body = make_player_body(soccer_scene, GREEN, PLAYER1_BODY_SPAWN, "images/riiyer.png"); //0
     body_t *p1_leg = make_p1_leg(soccer_scene, BLACK, PLAYER1_LEG_SPAWN, PLAYER1_LEG_TOP_LEFT); //1
-    body_t *p2_body = make_player_body(soccer_scene, BLUE, PLAYER2_BODY_SPAWN); //2
+    body_t *p2_body = make_player_body(soccer_scene, BLUE, PLAYER2_BODY_SPAWN, "images/ding.png"); //2
     body_t *p2_leg = make_p2_leg(soccer_scene, BLACK, PLAYER2_LEG_SPAWN, PLAYER2_LEG_TOP_RIGHT); //3
 
     body_t *ball = make_ball(soccer_scene, BALL_RADIUS); //4

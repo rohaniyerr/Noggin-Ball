@@ -5,6 +5,7 @@
 #include <time.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL2_gfxPrimitives.h>
+
 #include "sdl_wrapper.h"
 #include "body.h"
 #include "polygon.h"

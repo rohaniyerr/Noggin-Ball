@@ -11,6 +11,7 @@ typedef struct scene{
     list_t *textures;
     SDL_Texture *bkg;
     SDL_Surface *bkg_image;
+    Mix_Music *bkg_sound;
 } scene_t;
 
 typedef struct forcer {
@@ -37,6 +38,7 @@ scene_t *scene_init(void) {
     scene->textures = list_init(1, free);
     scene->bkg = NULL;
     scene->bkg_image = NULL;
+    scene->bkg_sound = NULL;
     assert(scene != NULL);
     assert(scene->bodies != NULL);
     return scene;
@@ -50,6 +52,8 @@ void scene_free(scene_t *scene) {
             forcers->freer(forcers->aux);
         }
     }
+    Mix_CloseAudio();
+    Mix_FreeMusic(scene->bkg_sound);
     list_free(scene->force_creator_list);
     list_free(scene->bodies);
     free(scene);
@@ -70,6 +74,16 @@ void scene_set_bkg_image(scene_t *scene, const char *filename) {
 
 SDL_Surface *scene_get_bkg_image(scene_t *scene) {
   return scene->bkg_image;
+}
+
+void scene_set_bkg_sound(scene_t *scene, const char *filename) {
+  Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096);
+  Mix_Music *sound = Mix_LoadMUS(filename);
+  scene->bkg_sound = sound;
+}
+
+Mix_Music *scene_get_bkg_sound(scene_t *scene) {
+  return scene->bkg_sound;
 }
 
 size_t scene_bodies(scene_t *scene) {
