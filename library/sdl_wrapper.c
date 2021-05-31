@@ -324,9 +324,9 @@ void sdl_render_scene(scene_t *scene) {
 void sdl_init_textures(scene_t *s) {
     int *width = malloc(sizeof(int)), *height = malloc(sizeof(int));
     SDL_GetWindowSize(window, width, height);
-    double center_x = *width / 2.0, center_y = *height / 2.0;
-    double x_scale = center_x / max_diff.x, y_scale = center_y / max_diff.y;
-    double scale = x_scale < y_scale ? x_scale : y_scale;
+    // double center_x = *width / 2.0, center_y = *height / 2.0;
+    // double x_scale = center_x / max_diff.x, y_scale = center_y / max_diff.y;
+    // double scale = x_scale < y_scale ? x_scale : y_scale;
     if (scene_get_bkg_image(s)) {
         SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, scene_get_bkg_image(s));
         scene_set_bkg(s, texture);

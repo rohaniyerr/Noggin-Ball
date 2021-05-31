@@ -77,8 +77,9 @@ SDL_Surface *scene_get_bkg_image(scene_t *scene) {
 }
 
 void scene_set_bkg_sound(scene_t *scene, const char *filename) {
-  Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096);
+  Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
   Mix_Music *sound = Mix_LoadMUS(filename);
+  Mix_PlayMusic(sound, -1);
   scene->bkg_sound = sound;
 }
 

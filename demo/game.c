@@ -453,6 +453,7 @@ int main() {
     scene_t *soccer_scene = scene_init();
     
     scene_set_bkg_image(soccer_scene, "images/stadium.png");
+    scene_set_bkg_sound(soccer_scene, "sounds/crowd.mp3");
     
     rgb_color_t *GREEN = rgb_color_init(0,1,0);
     rgb_color_t *BLUE = rgb_color_init(0,0,1);

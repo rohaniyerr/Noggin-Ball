@@ -156,4 +156,8 @@ void scene_add_texture(scene_t *scene, SDL_Texture *texture);
  */
 list_t *scene_textures_list(scene_t *scene);
 
+void scene_set_bkg_sound(scene_t *scene, const char *filename);
+
+Mix_Music *scene_get_bkg_sound(scene_t *scene);
+
 #endif // #ifndef __SCENE_H__
