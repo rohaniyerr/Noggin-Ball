@@ -38,6 +38,10 @@ void forcer_free(forcer_t *force);
  */
 scene_t *scene_init(void);
 
+void scene_set_info(scene_t *scene, void *info);
+
+void *scene_get_info(scene_t *scene);
+
 /**
  * Releases memory allocated for a given scene
  * and all the bodies and force creators it contains.

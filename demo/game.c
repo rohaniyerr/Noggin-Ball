@@ -38,8 +38,8 @@ const vector_t PLAYER1_BODY_SPAWN = {200, 70};
 const vector_t PLAYER2_BODY_SPAWN = {800, 70};
 const vector_t PLAYER1_LEG_SPAWN = {240, 70};
 const vector_t PLAYER2_LEG_SPAWN = {760, 70};
-const double PLAYER_MAJOR_AXIS = 1;
-const double PLAYER_MINOR_AXIS = 1.5;
+const double PLAYER_MAJOR_AXIS = 0.7;
+const double PLAYER_MINOR_AXIS = 0.9;
 const vector_t PLAYER1_LEG_TOP_LEFT = {215, 92};
 const vector_t PLAYER2_LEG_TOP_RIGHT = {800, 30};
 const double LEG_SCALING = 3.5;
@@ -448,53 +448,82 @@ void ball_too_fast(body_t *body) {
     }
 }
 
+void make_forces(scene_t *scene) {
+    body_t *ball = scene_get_body(scene, BALL_NUMBER_IN_SCENE);
+    //add drag to ball so it doesn't accelerate
+    create_drag(scene, GAMMA, ball);
+    //add gravity to ball and players
+    for (size_t i = 0; i < 5; i++) { 
+        if (i == 4) {create_planet_gravity(scene, GRAVITY, scene_get_body(scene, i)); }
+        else {create_planet_gravity(scene, PLAYER_GRAVITY, scene_get_body(scene, i)); }
+        create_normal_force(scene, scene_get_body(scene, i), scene_get_body(scene, FLOOR_NUMBER));
+    }
+    //add physics collisions between players and ball
+    for (size_t i = 0; i < 4; i++) { 
+        create_physics_one_collision(scene, PLAYER_ELASTICITY, scene_get_body(scene, i), ball);
+    }
+    //add physics collisions between the ball and the walls
+    //add physics collisions between players and walls
+    for (size_t i = 5; i < scene_bodies(scene); i++) { 
+        create_physics_one_collision(scene, WALL_ELASTICITY, scene_get_body(scene, i), ball);
+        for (size_t j = 0; j < 4; j++) {
+            if (j % 2 == 0 || i == FLOOR_NUMBER) {create_physics_collision(scene, WALL_ELASTICITY, scene_get_body(scene, j), scene_get_body(scene, i)); }
+        }
+    }
+}
+
+void make_shapes(scene_t *soccer_scene) {
+    rgb_color_t *GREEN = rgb_color_init(0,1,0);
+    rgb_color_t *BLUE = rgb_color_init(0,0,1);
+    rgb_color_t *BLACK = rgb_color_init(0,0,0);
+
+    make_player_body(soccer_scene, GREEN, PLAYER1_BODY_SPAWN, "images/riiyer.png"); //0
+    make_p1_leg(soccer_scene, BLACK, PLAYER1_LEG_SPAWN, PLAYER1_LEG_TOP_LEFT); //1
+    make_player_body(soccer_scene, BLUE, PLAYER2_BODY_SPAWN, "images/ding.png"); //2
+    make_p2_leg(soccer_scene, BLACK, PLAYER2_LEG_SPAWN, PLAYER2_LEG_TOP_RIGHT); //3
+
+    make_ball(soccer_scene, BALL_RADIUS); //4
+
+    make_walls(soccer_scene); //5,6,7,8
+    make_goals(soccer_scene); //9,10,11,12
+}
+
+void on_key_title(char key, key_event_type_t type, void *scene) {
+    if (type == KEY_PRESSED) {
+        switch (key) {
+            case SDLK_SPACE:
+                scene_set_info(scene, false);
+        }
+    }
+}
+
 int main() {
     sdl_init(MIN_POINT, MAX_POINT);
+    scene_t *title = scene_init();
     scene_t *soccer_scene = scene_init();
     
     scene_set_bkg_image(soccer_scene, "images/stadium.png");
     scene_set_bkg_sound(soccer_scene, "sounds/crowd.mp3");
     
-    rgb_color_t *GREEN = rgb_color_init(0,1,0);
-    rgb_color_t *BLUE = rgb_color_init(0,0,1);
-    rgb_color_t *BLACK = rgb_color_init(0,0,0);
+    sdl_on_key((key_handler_t) on_key_title);
 
+    scene_add_body(title, make_rectangle(100, 100, BALL_SPAWN));
+    while (!sdl_is_done(title)) {
+        double dt = time_since_last_tick();
+        scene_tick(title, dt);
+        sdl_render_scene(title);
+        if (!((bool)scene_get_info(title))) { break; }
+    }
+    scene_free(title);
 
-    body_t *p1_body = make_player_body(soccer_scene, GREEN, PLAYER1_BODY_SPAWN, "images/riiyer.png"); //0
-    body_t *p1_leg = make_p1_leg(soccer_scene, BLACK, PLAYER1_LEG_SPAWN, PLAYER1_LEG_TOP_LEFT); //1
-    body_t *p2_body = make_player_body(soccer_scene, BLUE, PLAYER2_BODY_SPAWN, "images/ding.png"); //2
-    body_t *p2_leg = make_p2_leg(soccer_scene, BLACK, PLAYER2_LEG_SPAWN, PLAYER2_LEG_TOP_RIGHT); //3
+    make_shapes(soccer_scene);
+    make_forces(soccer_scene);
 
-    body_t *ball = make_ball(soccer_scene, BALL_RADIUS); //4
-
-    make_walls(soccer_scene); //5,6,7,8
-    make_goals(soccer_scene); //9,10,11,12
-
-    player_t *player1 = player_init(p1_body, p1_leg, 0, 0, 0);
-    player_t *player2 = player_init(p2_body, p2_leg, 0, 0, 0);
+    player_t *player1 = player_init(scene_get_body(soccer_scene, 0), scene_get_body(soccer_scene, 1), 0, 0, 0);
+    player_t *player2 = player_init(scene_get_body(soccer_scene, 2), scene_get_body(soccer_scene, 3), 0, 0, 0);
 
     sdl_on_key((key_handler_t) on_key_player);
 
-    //add drag to ball so it doesn't accelerate
-    create_drag(soccer_scene, GAMMA, ball);
-    //add gravity to ball and players
-    for (size_t i = 0; i < 5; i++) { 
-        if (i == 4) {create_planet_gravity(soccer_scene, GRAVITY, scene_get_body(soccer_scene, i)); }
-        else {create_planet_gravity(soccer_scene, PLAYER_GRAVITY, scene_get_body(soccer_scene, i)); }
-        create_normal_force(soccer_scene, scene_get_body(soccer_scene, i), scene_get_body(soccer_scene, FLOOR_NUMBER));
-    }
-    //add physics collisions between players and ball
-    for (size_t i = 0; i < 4; i++) { 
-        create_physics_one_collision(soccer_scene, PLAYER_ELASTICITY, scene_get_body(soccer_scene, i), ball);
-    }
-    //add physics collisions between the ball and the walls
-    //add physics collisions between players and walls
-    for (size_t i = 5; i < scene_bodies(soccer_scene); i++) { 
-        create_physics_one_collision(soccer_scene, WALL_ELASTICITY, scene_get_body(soccer_scene, i), ball);
-        for (size_t j = 0; j < 4; j++) {
-            if (j % 2 == 0 || i == FLOOR_NUMBER) {create_physics_collision(soccer_scene, WALL_ELASTICITY, scene_get_body(soccer_scene, j), scene_get_body(soccer_scene, i)); }
-        }
-    }
     make_SDL_image();
     sdl_init_textures(soccer_scene);
 

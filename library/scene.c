@@ -8,6 +8,7 @@ typedef struct scene{
     size_t size;
     size_t capacity;
     list_t *force_creator_list;
+    void *info;
     list_t *textures;
     SDL_Texture *bkg;
     SDL_Surface *bkg_image;
@@ -29,6 +30,14 @@ void forcer_free(forcer_t *force) {
     free(force);
 }
 
+void scene_set_info(scene_t *scene, void *info) {
+    scene->info = info;
+}
+
+void *scene_get_info(scene_t *scene) {
+    return scene->info;
+}
+
 scene_t *scene_init(void) {
     scene_t *scene = malloc(sizeof(scene_t));
     scene->bodies = list_init(guess, (free_func_t) body_free);
@@ -36,6 +45,7 @@ scene_t *scene_init(void) {
     scene->capacity = guess;
     scene->force_creator_list = list_init(1, free);
     scene->textures = list_init(1, free);
+    scene->info = (void *) true;
     scene->bkg = NULL;
     scene->bkg_image = NULL;
     scene->bkg_sound = NULL;
