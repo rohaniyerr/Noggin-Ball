@@ -426,6 +426,13 @@ bool check_goal(body_t *ball, player_t *p1, player_t *p2) {
     return false;
 }
 
+void play_goal_sound(scene_t *scene, const char *filename){
+    Mix_Chunk *goal = Mix_LoadWAV(filename); //filename should end in .wav
+    Mix_PlayChannel(-1, goal, 1);
+    Mix_FreeChunk(goal);
+    Mix_Quit();
+}
+
 void reset_scene(scene_t *scene, player_t *player1, player_t *player2){
     body_t *p1_body = player1->body;
     body_t *p1_leg = player1->leg;
@@ -433,6 +440,7 @@ void reset_scene(scene_t *scene, player_t *player1, player_t *player2){
     body_t *p2_leg = player2->leg;
     body_t *ball = scene_get_body(scene, BALL_NUMBER_IN_SCENE);
     if (check_goal(ball, player1, player2)) {
+        play_goal_sound(scene, "sounds/goal.wav");
         body_set_centroid(p1_body, PLAYER1_BODY_SPAWN);
         body_set_centroid(p1_leg, PLAYER1_LEG_SPAWN);
         body_set_centroid(p2_body, PLAYER2_BODY_SPAWN);
@@ -488,6 +496,7 @@ void make_shapes(scene_t *soccer_scene) {
     make_goals(soccer_scene); //9,10,11,12
 }
 
+
 void on_key_title(char key, key_event_type_t type, void *scene) {
     if (type == KEY_PRESSED) {
         switch (key) {
@@ -501,9 +510,6 @@ int main() {
     sdl_init(MIN_POINT, MAX_POINT);
     scene_t *title = scene_init();
     scene_t *soccer_scene = scene_init();
-    
-    scene_set_bkg_image(soccer_scene, "images/stadium.png");
-    scene_set_bkg_sound(soccer_scene, "sounds/crowd.mp3");
     
     sdl_on_key((key_handler_t) on_key_title);
 
@@ -523,6 +529,10 @@ int main() {
     player_t *player2 = player_init(scene_get_body(soccer_scene, 2), scene_get_body(soccer_scene, 3), 0, 0, 0);
 
     sdl_on_key((key_handler_t) on_key_player);
+
+    scene_set_bkg_image(soccer_scene, "images/stadium.png");
+    // scene_set_bkg_image(title, "image/title.png"); //todo
+    scene_set_bkg_sound(soccer_scene, "sounds/crowd.mp3");
 
     make_SDL_image();
     sdl_init_textures(soccer_scene);
