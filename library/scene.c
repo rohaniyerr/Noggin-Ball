@@ -9,8 +9,10 @@ typedef struct scene{
     size_t capacity;
     list_t *force_creator_list;
     char info;
-    size_t player1;
-    size_t player2;
+    size_t p1_num;
+    size_t p2_num;
+    player_t *player1;
+    player_t *player2;
     list_t *textures;
     SDL_Texture *bkg;
     SDL_Surface *bkg_image;
@@ -32,11 +34,11 @@ void forcer_free(forcer_t *force) {
     free(force);
 }
 
-void scene_set_info(scene_t *scene, void *info) {
+void scene_set_info(scene_t *scene, char info) {
     scene->info = info;
 }
 
-void *scene_get_info(scene_t *scene) {
+char scene_get_info(scene_t *scene) {
     return scene->info;
 }
 
@@ -51,6 +53,8 @@ scene_t *scene_init(void) {
     scene->bkg = NULL;
     scene->bkg_image = NULL;
     scene->bkg_sound = NULL;
+    scene->p1_num = 1;
+    scene->p2_num = 2;
     scene->player1 = NULL;
     scene->player2 = NULL;
     assert(scene != NULL);
@@ -58,22 +62,37 @@ scene_t *scene_init(void) {
     return scene;
 }
 
-void scene_set_player1(scene_t *scene, size_t player) {
+void scene_set_p1(scene_t *scene, size_t player) {
+    scene->p1_num = player;
+}
+
+size_t scene_get_p1(scene_t *scene) {
+    return scene->p1_num;
+}
+
+void scene_set_p2(scene_t *scene, size_t player) {
+    scene->p2_num = player;
+}
+
+size_t scene_get_p2(scene_t *scene) {
+    return scene->p2_num;
+}
+
+void scene_set_player1(scene_t *scene, player_t *player) {
     scene->player1 = player;
 }
 
-size_t scene_get_player1(scene_t *scene) {
+player_t *scene_get_player1(scene_t *scene) {
     return scene->player1;
 }
 
-void scene_set_player2(scene_t *scene, size_t player) {
+void scene_set_player2(scene_t *scene, player_t *player) {
     scene->player2 = player;
 }
 
-size_t scene_get_player2(scene_t *scene) {
+player_t *scene_get_player2(scene_t *scene) {
     return scene->player2;
 }
-
 
 void scene_free(scene_t *scene) {
     for(size_t i = 0; i < list_size(scene->force_creator_list); i++){

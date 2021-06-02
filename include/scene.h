@@ -3,6 +3,7 @@
 
 #include "body.h"
 #include "list.h"
+#include "player.h"
 #include <assert.h>
 #include <stdlib.h>
 #include <SDL2/SDL.h>
@@ -38,9 +39,25 @@ void forcer_free(forcer_t *force);
  */
 scene_t *scene_init(void);
 
-void scene_set_info(scene_t *scene, void *info);
+void scene_set_info(scene_t *scene, char info);
 
-void *scene_get_info(scene_t *scene);
+char scene_get_info(scene_t *scene);
+
+void scene_set_p1(scene_t *scene, size_t player);
+
+size_t scene_get_p1(scene_t *scene);
+
+void scene_set_p2(scene_t *scene, size_t player);
+
+size_t scene_get_p2(scene_t *scene);
+
+void scene_set_player1(scene_t *scene, player_t *player);
+
+player_t *scene_get_player1(scene_t *scene);
+
+void scene_set_player2(scene_t *scene, player_t *player);
+
+player_t *scene_get_player2(scene_t *scene);
 
 /**
  * Releases memory allocated for a given scene

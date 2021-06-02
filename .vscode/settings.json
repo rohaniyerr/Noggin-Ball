@@ -3,6 +3,7 @@
         "list.h": "c",
         "stdlib.h": "c",
         "polygon.h": "c",
-        "scene.h": "c"
+        "scene.h": "c",
+        "player.h": "c"
     }
 }
