@@ -51,20 +51,20 @@ const double BALL_RADIUS = 25;
 const vector_t BALL_SPAWN = {WINDOW_WIDTH_/2 , 400};
 double BALL_MAX_VELOCITY = 1000;
 
-player_t *make_ding(size_t player_idx) {
-    player_init(250, 150);
+player_t *make_ding(body_t *body, body_t *leg) {
+    player_init(body, leg, 250, 150);
 }
 
-player_t *make_riiyer(size_t player_idx) {
-    player_init(200, 200);
+player_t *make_riiyer(body_t *body, body_t *leg) {
+    player_init(body, leg, 200, 200);
 }
 
-player_t *make_dzli(size_t player_idx) {
-    player_init(150, 250);
+player_t *make_dzli(body_t *body, body_t *leg) {
+    player_init(body, leg, 150, 250);
 }
 
-player_t *make_eseiner(size_t player_idx) {
-    player_init(300, 300);
+player_t *make_eseiner(body_t *body, body_t *leg) {
+    player_init(body, leg, 300, 300);
 }
 
 void on_key_player(char key, key_event_type_t type, void *scene) {
@@ -596,6 +596,8 @@ int main() {
     scene_t *title = scene_init();
     scene_t *soccer_scene = scene_init();
     scene_t *char_scene = scene_init();
+    size_t p1_idx = 1;
+    size_t p2_idx = 2;
     
     sdl_on_key((key_handler_t) on_key_title);
     
@@ -620,6 +622,8 @@ int main() {
                 double dt = time_since_last_tick();
                 scene_tick(char_scene, dt);
                 sdl_render_scene(char_scene);
+                p1_idx = scene_get_player1(char_scene);
+                p2_idx = scene_get_player2(char_scene);
                 if (scene_get_info(char_scene) == 'g') { scene_free(char_scene); break; }
             }
             break;
