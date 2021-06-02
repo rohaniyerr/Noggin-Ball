@@ -210,6 +210,24 @@ void on_key_player(char key, key_event_type_t type, void *scene) {
                     body_set_rotation(leg2, M_PI / 3);
                     break;
                 }
+            case SDLK_m:
+                if(true == true){
+                    if(!Mix_PlayingMusic()){
+                        SDL_Init(SDL_INIT_AUDIO);
+                        Mix_Init(MIX_INIT_FLAC | MIX_INIT_MOD | MIX_INIT_MP3 | MIX_INIT_OGG);
+                        Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 512);
+                        Mix_Music *sound = Mix_LoadMUS("sounds/crowd.wav");
+                        scene_set_bkg_sound(scene, sound);
+                        Mix_PlayMusic(sound, -1);
+                    }
+                    else if(Mix_PausedMusic()){
+                        Mix_ResumeMusic();
+                    }
+                    else{
+                        Mix_PauseMusic();
+                    }
+                    break;
+                }
         }
     }
     else {
@@ -710,7 +728,6 @@ int main() {
     sdl_on_key((key_handler_t) on_key_player);
 
     scene_set_bkg_image(soccer_scene, "images/stadium.png");
-    scene_set_bkg_sound(soccer_scene, "sounds/crowd.mp3");
 
     TTF_Font *font = TTF_OpenFont("fonts/OpenSans-Bold.ttf", 24);
     SDL_Rect *p1_scoreboard = sdl_rect_init(340, 20, 50, 70);
