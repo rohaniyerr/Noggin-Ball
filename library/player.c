@@ -12,7 +12,6 @@ typedef struct player {
     double jump_scalar;
     double speed_scalar;
     double kick_speed;
-    // const char *filename;
 } player_t;
 
 player_t *player_init(body_t *body, body_t *leg, double jump, double speed, vector_t gravity, const char* filename) {

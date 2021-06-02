@@ -49,12 +49,12 @@ scene_t *scene_init(void) {
     scene->capacity = guess;
     scene->force_creator_list = list_init(1, free);
     scene->textures = list_init(1, free);
-    scene->info = (void *) true;
+    scene->info = ' ';
     scene->bkg = NULL;
     scene->bkg_image = NULL;
     scene->bkg_sound = NULL;
     scene->p1_num = 1;
-    scene->p2_num = 2;
+    scene->p2_num = 4;
     scene->player1 = NULL;
     scene->player2 = NULL;
     assert(scene != NULL);

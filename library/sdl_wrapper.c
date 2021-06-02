@@ -309,6 +309,16 @@ void sdl_render_scene(scene_t *scene) {
         sdl_draw_polygon(shape, body_get_color(body));
         list_free(shape);
     }
+    if (is_SDL_image) {
+      SDL_Texture *bkg = scene_get_bkg(scene);
+      SDL_Rect *dest = malloc(sizeof(SDL_Rect));
+      dest->x = 0;
+      dest->y = 0;
+      dest->w = 1000;
+      dest->h = 1000;
+      SDL_RenderCopy(renderer, bkg, NULL, dest);
+      free(dest);
+    }
     sdl_show();
 }
 
@@ -324,7 +334,6 @@ void sdl_render_game_scene(scene_t *scene, char *p1, char *p2, char *timer, SDL_
       SDL_RenderCopy(renderer, bkg, NULL, dest);
       free(dest);
     }
-
     size_t body_count = scene_bodies(scene);
     for (size_t i = 0; i < body_count; i++) {
         body_t *body = scene_get_body(scene, i);

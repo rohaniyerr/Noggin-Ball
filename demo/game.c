@@ -6,29 +6,41 @@
 #include "body.h"
 #include "forces.h"
 #include "polygon.h"
+#include "player.h"
 #include "SDL2/SDL.h"
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_mixer.h>
 #include <SDL2/SDL_ttf.h>
 #include "sdl_wrapper.h"
-#include "player.h"
 
 const size_t WINDOW_WIDTH_ = 1000;
 const size_t WINDOW_HEIGHT_ = 500;
 const vector_t MIN_POINT = {0, 0};
 const vector_t MAX_POINT = {WINDOW_WIDTH_, WINDOW_HEIGHT_};
 
-const double RIGHT_VELOCITY = 200;
-const double LEFT_VELOCITY = -200;
-const double JUMP_VELOCITY = 200;
-const double VELOCITY = 200;
-
+const double DING_JUMP_SCALAR = 300;
+const double DING_SPEED_SCALAR = 200;
+const vector_t DING_GRAVITY = {0, -600};
 const char *DING_PIC = "images/ding.png";
+
+const double DZLI_JUMP_SCALAR = 200;
+const double DZLI_SPEED_SCALAR = 300;
+const vector_t DZLI_GRAVITY = {0, -400};
+const char *DZLI_PIC = "images/dzli.png";
+
+const double RIIYER_JUMP_SCALAR = 250;
+const double RIIYER_SPEED_SCALAR = 250;
+const vector_t RIIYER_GRAVITY = {0, -500};
 const char *RIIYER_PIC = "images/riiyer.png";
 
-const double GAMMA = 2;
-const vector_t GRAVITY = {0, -200};
-const vector_t PLAYER_GRAVITY = {0, -500};
+const double ESEINER_JUMP_SCALAR = 350;
+const double ESEINR_SPEED_SCALAR = 350;
+const vector_t ESEINER_GRAVITY = {0, -700};
+const char *ESEINER_PIC = "images/eseiner.png";
+
+const double GAMMA = 1.5;
+const vector_t GRAVITY = {0, -400};
+// const vector_t PLAYER_GRAVITY = {0, -500};
 const double WALL_ELASTICITY = 0.15;
 const double PLAYER_ELASTICITY = 0.4;
 const size_t BALL_NUMBER_IN_SCENE = 4;
@@ -55,22 +67,22 @@ const vector_t BALL_SPAWN = {WINDOW_WIDTH_/2 , 400};
 double BALL_MAX_VELOCITY = 1000;
 
 player_t *make_ding(body_t *body, body_t *leg) {
-    player_t* ding = player_init(body, leg, 250, 150, PLAYER_GRAVITY, DING_PIC);
+    player_t* ding = player_init(body, leg, DING_JUMP_SCALAR, DING_SPEED_SCALAR, DING_GRAVITY, DING_PIC);
     return ding;
 }
 
 player_t *make_riiyer(body_t *body, body_t *leg) {
-    player_t* riiyer = player_init(body, leg, 200, 200, PLAYER_GRAVITY, RIIYER_PIC);
+    player_t* riiyer = player_init(body, leg, RIIYER_JUMP_SCALAR, RIIYER_SPEED_SCALAR, RIIYER_GRAVITY, RIIYER_PIC);
     return riiyer;
 }
 
 player_t *make_dzli(body_t *body, body_t *leg) {
-    player_t* dzli = player_init(body, leg, 150, 250, PLAYER_GRAVITY, DING_PIC);
+    player_t* dzli = player_init(body, leg, DZLI_JUMP_SCALAR, DZLI_SPEED_SCALAR, DZLI_GRAVITY, DZLI_PIC);
     return dzli;
 }
 
 player_t *make_eseiner(body_t *body, body_t *leg) {
-    player_t* eli = player_init(body, leg, 300, 300, PLAYER_GRAVITY, DING_PIC);
+    player_t* eli = player_init(body, leg, ESEINER_JUMP_SCALAR, ESEINR_SPEED_SCALAR, ESEINER_GRAVITY, ESEINER_PIC);
     return eli;
 }
 
@@ -79,18 +91,19 @@ void make_player1(scene_t *scene, size_t index) {
         player_t *dzli = make_dzli(scene_get_body(scene, 0), scene_get_body(scene, 1));
         scene_set_player1(scene, dzli);
     }
-    if (index == 2) {
+    else if (index == 2) {
         player_t *ding = make_ding(scene_get_body(scene, 0), scene_get_body(scene, 1));
         scene_set_player1(scene, ding);
     }
-    if (index == 3) {
+    else if (index == 3) {
         player_t *riiyer = make_riiyer(scene_get_body(scene, 0), scene_get_body(scene, 1));
         scene_set_player1(scene, riiyer);
     }
-    if (index == 4) {
+    else if (index == 4) {
         player_t *eseiner = make_eseiner(scene_get_body(scene, 0), scene_get_body(scene, 1));
         scene_set_player1(scene, eseiner);
     }
+    scene_set_p1(scene, index);
 }
 
 void make_player2(scene_t *scene, size_t index) {
@@ -98,18 +111,19 @@ void make_player2(scene_t *scene, size_t index) {
         player_t *dzli = make_dzli(scene_get_body(scene, 2), scene_get_body(scene, 3));
         scene_set_player2(scene, dzli);
     }
-    if (index == 2) {
+    else if (index == 2) {
         player_t *ding = make_ding(scene_get_body(scene, 2), scene_get_body(scene, 3));
         scene_set_player2(scene, ding);
     }
-    if (index == 3) {
+    else if (index == 3) {
         player_t *riiyer = make_riiyer(scene_get_body(scene, 2), scene_get_body(scene, 3));
         scene_set_player2(scene, riiyer);
     }
-    if (index == 4) {
+    else if (index == 4) {
         player_t *eseiner = make_eseiner(scene_get_body(scene, 2), scene_get_body(scene, 3));
         scene_set_player2(scene, eseiner);
     }
+    scene_set_p2(scene, index);
 }
 
 void on_key_player(char key, key_event_type_t type, void *scene) {
@@ -517,7 +531,7 @@ void make_forces(scene_t *scene) {
     //add gravity to ball and players
     for (size_t i = 0; i < 5; i++) { 
         if (i == 4) {create_planet_gravity(scene, GRAVITY, scene_get_body(scene, i)); }
-        else if (i < 3) {create_planet_gravity(scene, P1_GRAVITY, scene_get_body(scene, i)); }
+        else if (i < 2) {create_planet_gravity(scene, P1_GRAVITY, scene_get_body(scene, i)); }
         else {create_planet_gravity(scene, P2_GRAVITY, scene_get_body(scene, i)); }
         create_normal_force(scene, scene_get_body(scene, i), scene_get_body(scene, FLOOR_NUMBER));
     }
@@ -688,9 +702,6 @@ int main() {
     scene_set_bkg_image(soccer_scene, "images/stadium.png");
     scene_set_bkg_sound(soccer_scene, "sounds/crowd.mp3");
 
-    make_SDL_image();
-    sdl_init_textures(soccer_scene);
-
     TTF_Font *font = TTF_OpenFont("fonts/OpenSans-Bold.ttf", 24);
     SDL_Rect *p1_scoreboard = sdl_rect_init(340, 20, 50, 70);
     SDL_Rect *p2_scoreboard = sdl_rect_init(600, 20, 50, 70);
@@ -708,8 +719,9 @@ int main() {
     int seconds = 60 - time;
     sprintf(timer, "%d", seconds);
 
+    sdl_init_textures(soccer_scene);
+
     while (!sdl_is_done(soccer_scene)) {
-        sdl_render_scene(soccer_scene);
         double dt = time_since_last_tick();
         time += dt;
         if (time > 59.8) {
@@ -718,8 +730,8 @@ int main() {
         check_edge(soccer_scene);
         check_player_legs(soccer_scene, player1, player2);
         ball_too_fast(scene_get_body(soccer_scene, BALL_NUMBER_IN_SCENE));
-        scene_tick(soccer_scene, dt);
         reset_scene(soccer_scene, player1, player2);
+        scene_tick(soccer_scene, dt);
         sdl_render_game_scene(soccer_scene, p1, p2, timer, p1_scoreboard, p2_scoreboard, time_board, font, black);
         if (player_get_score(player1) != p1_score) {
             p1_score = player_get_score(player1);
