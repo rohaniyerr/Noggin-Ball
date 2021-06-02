@@ -102,6 +102,8 @@ void scene_free(scene_t *scene) {
             forcers->freer(forcers->aux);
         }
     }
+    Mix_CloseAudio();
+    Mix_FreeMusic(scene_get_bkg_sound(scene));
     list_free(scene->force_creator_list);
     list_free(scene->bodies);
     if (scene->player1 != NULL) {

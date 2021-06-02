@@ -482,10 +482,6 @@ void check_edge(scene_t *scene) {
     }
 }
 
-void stop_bkg_sound(scene_t *scene){
-    Mix_CloseAudio();
-    Mix_FreeMusic(scene_get_bkg_sound(scene));
-}
 
 bool check_goal(body_t *ball, player_t *p1, player_t *p2) {
     double y_lim = (WINDOW_HEIGHT_/8 - 22) + (WINDOW_HEIGHT_/4 - 20) - 2 * 10;
@@ -774,7 +770,6 @@ int main() {
             sprintf(timer, "%d", seconds);
         }
     }
-    stop_bkg_sound(soccer_scene);
     end_game(player1, player2);
     scene_free(soccer_scene);
     free(p1_scoreboard);
