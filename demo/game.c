@@ -587,22 +587,31 @@ void on_key_char(char key, key_event_type_t type, void *scene) {
         switch (key) {
             case SDLK_q:
                 scene_set_info(scene, 'g');
+                break;
             case SDLK_1:
-                scene_set_p1(scene, 1);
+                scene_set_p1(scene, (size_t) 1);
+                break;
             case SDLK_2:
-                scene_set_p1(scene, 2);
+                scene_set_p1(scene, (size_t) 2);
+                break;
             case SDLK_3:
-                scene_set_p1(scene, 3);
+                scene_set_p1(scene, (size_t) 3);
+                break;
             case SDLK_4:
-                scene_set_p1(scene, 4);
+                scene_set_p1(scene, (size_t) 4);
+                break;
             case SDLK_5:
-                scene_set_p2(scene, 1);
+                scene_set_p2(scene, (size_t) 1);
+                break;
             case SDLK_6:
-                scene_set_p2(scene, 2);
+                scene_set_p2(scene, (size_t) 2);
+                break;
             case SDLK_7:
-                scene_set_p2(scene, 3);
+                scene_set_p2(scene, (size_t) 3);
+                break;
             case SDLK_8:
-                scene_set_p2(scene, 4);
+                scene_set_p2(scene, (size_t) 4);
+                break;
         }
     }
 }
@@ -681,10 +690,11 @@ int main() {
                 double dt = time_since_last_tick();
                 scene_tick(char_scene, dt);
                 sdl_render_scene(char_scene);
-                p1_idx = scene_get_p1(char_scene);
-                p2_idx = scene_get_p2(char_scene);
-                if (scene_get_info(char_scene) == 'g') { scene_free(char_scene); break; }
+                if (scene_get_info(char_scene) == 'g') { break; }
             }
+            p1_idx = scene_get_p1(char_scene);
+            p2_idx = scene_get_p2(char_scene);
+            scene_free(char_scene);
             break;
         }
     }
