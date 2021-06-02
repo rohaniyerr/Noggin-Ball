@@ -115,6 +115,7 @@ void sdl_init(vector_t min, vector_t max) {
     center = vec_multiply(0.5, vec_add(min, max));
     max_diff = vec_subtract(max, center);
     SDL_Init(SDL_INIT_EVERYTHING);
+    SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
     window = SDL_CreateWindow(
         WINDOW_TITLE,
         SDL_WINDOWPOS_CENTERED,
@@ -123,6 +124,7 @@ void sdl_init(vector_t min, vector_t max) {
         WINDOW_HEIGHT,
         SDL_WINDOW_RESIZABLE
     );
+    TTF_Init();
     renderer = SDL_CreateRenderer(window, -1, 0);
 }
 
@@ -300,6 +302,18 @@ void sdl_show(void) {
 
 void sdl_render_scene(scene_t *scene) {
     sdl_clear();
+    size_t body_count = scene_bodies(scene);
+    for (size_t i = 0; i < body_count; i++) {
+        body_t *body = scene_get_body(scene, i);
+        list_t *shape = body_get_shape(body);
+        sdl_draw_polygon(shape, body_get_color(body));
+        list_free(shape);
+    }
+    sdl_show();
+}
+
+void sdl_render_game_scene(scene_t *scene, char *p1, char *p2, char *timer, SDL_Rect *p1_scoreboard, SDL_Rect *p2_scoreboard, SDL_Rect *time_board, TTF_Font *font, SDL_Color color) {
+    sdl_clear();
     if (is_SDL_image) {
       SDL_Texture *bkg = scene_get_bkg(scene);
       SDL_Rect *dest = malloc(sizeof(SDL_Rect));
@@ -318,6 +332,7 @@ void sdl_render_scene(scene_t *scene) {
         sdl_draw_polygon_body(body, body_get_color(body));
         body_set_centroid(body, original_body_position);
     }
+    make_scoreboard(p1, p2, timer, p1_scoreboard, p2_scoreboard, time_board, font, color);
     sdl_show();
 }
 
@@ -358,4 +373,27 @@ double time_since_last_tick(void) {
         : 0.0; // return 0 the first time this is called
     last_clock = now;
     return difference;
+}
+
+SDL_Rect *sdl_rect_init(int x, int y, int w, int h) {
+    SDL_Rect *rect = malloc(sizeof(SDL_Rect));
+    rect->x = x;
+    rect->y = y;
+    rect->w = w;
+    rect->h = h;
+    return rect;
+}
+
+void generate_text(char *text, TTF_Font *font, SDL_Color color, SDL_Rect *rect) {
+    SDL_Surface *text_surface = TTF_RenderText_Solid(font, text, color);
+    SDL_Texture* message = SDL_CreateTextureFromSurface(renderer, text_surface);
+    SDL_RenderCopy(renderer, message, NULL, rect);
+    SDL_FreeSurface(text_surface);
+    SDL_DestroyTexture(message);
+}
+
+void make_scoreboard(char *p1, char *p2, char *timer, SDL_Rect *p1_scoreboard, SDL_Rect *p2_scoreboard, SDL_Rect *time_board, TTF_Font *font, SDL_Color color) {
+    generate_text(p1, font, color, p1_scoreboard);
+    generate_text(p2, font, color, p2_scoreboard);
+    generate_text(timer, font, color, time_board);
 }

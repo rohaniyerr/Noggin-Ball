@@ -82,7 +82,10 @@ void sdl_show(void);
  *
  * @param scene the scene to draw
  */
+
 void sdl_render_scene(scene_t *scene);
+
+void sdl_render_game_scene(scene_t *scene, char *p1, char *p2, char *timer, SDL_Rect *p1_scoreboard, SDL_Rect *p2_scoreboard, SDL_Rect *time_board, TTF_Font *font, SDL_Color color);
 
 /**
  * Registers a function to be called every time a key is pressed.
@@ -125,5 +128,11 @@ void make_SDL_image(void);
 void sdl_init_textures(scene_t *s);
 
 void sdl_draw_polygon_body(body_t *body, rgb_color_t color);
+
+void generate_text(char *text, TTF_Font *font, SDL_Color color, SDL_Rect *rect);
+
+SDL_Rect *sdl_rect_init(int x, int y, int w, int h);
+
+void make_scoreboard(char *p1, char *p2, char *timer, SDL_Rect *p1_scoreboard, SDL_Rect *p2_scoreboard, SDL_Rect *timer_rect, TTF_Font *font, SDL_Color color);
 
 #endif // #ifndef __SDL_WRAPPER_H__

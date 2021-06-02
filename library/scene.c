@@ -8,7 +8,9 @@ typedef struct scene{
     size_t size;
     size_t capacity;
     list_t *force_creator_list;
-    void *info;
+    char info;
+    size_t player1;
+    size_t player2;
     list_t *textures;
     SDL_Texture *bkg;
     SDL_Surface *bkg_image;
@@ -49,10 +51,29 @@ scene_t *scene_init(void) {
     scene->bkg = NULL;
     scene->bkg_image = NULL;
     scene->bkg_sound = NULL;
+    scene->player1 = NULL;
+    scene->player2 = NULL;
     assert(scene != NULL);
     assert(scene->bodies != NULL);
     return scene;
 }
+
+void scene_set_player1(scene_t *scene, size_t player) {
+    scene->player1 = player;
+}
+
+size_t scene_get_player1(scene_t *scene) {
+    return scene->player1;
+}
+
+void scene_set_player2(scene_t *scene, size_t player) {
+    scene->player2 = player;
+}
+
+size_t scene_get_player2(scene_t *scene) {
+    return scene->player2;
+}
+
 
 void scene_free(scene_t *scene) {
     for(size_t i = 0; i < list_size(scene->force_creator_list); i++){
@@ -66,6 +87,12 @@ void scene_free(scene_t *scene) {
     Mix_FreeMusic(scene->bkg_sound);
     list_free(scene->force_creator_list);
     list_free(scene->bodies);
+    if (scene->player1 != NULL) {
+        free(scene->player1);
+    }
+    if (scene->player2 != NULL) {
+        free(scene->player2);
+    }
     free(scene);
 }
 
@@ -87,7 +114,7 @@ SDL_Surface *scene_get_bkg_image(scene_t *scene) {
 }
 
 void scene_set_bkg_sound(scene_t *scene, const char *filename) {
-  Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 512);
+  Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
   Mix_Music *sound = Mix_LoadMUS(filename);
   Mix_PlayMusic(sound, -1);
   scene->bkg_sound = sound;
