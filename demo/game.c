@@ -592,6 +592,8 @@ void on_key_title(char key, key_event_type_t type, void *scene) {
                     scene_set_info(scene, 't');
                     break;
                 }
+            case SDLK_q:
+                exit(0);
         }
     }
 }
@@ -599,7 +601,7 @@ void on_key_title(char key, key_event_type_t type, void *scene) {
 void on_key_char(char key, key_event_type_t type, void *scene) {
     if (type == KEY_PRESSED) {
         switch (key) {
-            case SDLK_q:
+            case SDLK_RETURN:
                 scene_set_info(scene, 'g');
                 break;
             case SDLK_1:
@@ -626,6 +628,8 @@ void on_key_char(char key, key_event_type_t type, void *scene) {
             case SDLK_8:
                 scene_set_p2(scene, (size_t) 4);
                 break;
+            case SDLK_q:
+                exit(0);
         }
     }
 }
