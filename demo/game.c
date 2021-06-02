@@ -656,7 +656,7 @@ int main() {
         double dt = time_since_last_tick();
         scene_tick(title, dt);
         sdl_render_scene(title);   
-        if (scene_get_info(title) == 't') {scene_free(title); break; }
+        if (scene_get_info(title) == 't') { scene_free(title); break; }
         else if (scene_get_info(title) == 'c') {
             scene_free(title);
             sdl_on_key((key_handler_t) on_key_char);
