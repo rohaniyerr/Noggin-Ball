@@ -62,24 +62,24 @@ const size_t HOR_GOAL1_ID = 10;
 const size_t VERT_GOAL2_ID = 11;
 const size_t HOR_GOAL2_ID = 12;
 
-const vector_t LEFT_WALL_SPAWN = {5, 2*WINDOW_HEIGHT_/3};
-const vector_t RIGHT_WALL_SPAWN = {995, WINDOW_HEIGHT_/2};
-const vector_t CEILING_SPAWN = {WINDOW_WIDTH_/2, 495};
-const vector_t FLOOR_SPAWN = {WINDOW_WIDTH_/2, 5};
+const vector_t LEFT_WALL_SPAWN = {5, 250};
+const vector_t RIGHT_WALL_SPAWN = {995, 250};
+const vector_t CEILING_SPAWN = {500, 495};
+const vector_t FLOOR_SPAWN = {500, 5};
 
 const int GOAL_VERT_LENGTH = 10;
 const int GOAL_VERT_HEIGHT = 125;
-const vector_t GOAL1_VERT_SPAWN = {20, WINDOW_HEIGHT_/8 - 22};
-const vector_t GOAL2_VERT_SPAWN = {980, WINDOW_HEIGHT_/8 - 22};
+const vector_t GOAL1_VERT_SPAWN = {20, 40.5};
+const vector_t GOAL2_VERT_SPAWN = {980, 40.5};
 const int GOAL_HOR_LENGTH = 25;
 const int GOAL_HOR_HEIGHT = 10;
-const vector_t GOAL1_HOR_SPAWN = {55, WINDOW_HEIGHT_/4 + 30};
-const vector_t GOAL2_HOR_SPAWN = {945, WINDOW_HEIGHT_/4 + 30};
+const vector_t GOAL1_HOR_SPAWN = {55, 155};
+const vector_t GOAL2_HOR_SPAWN = {945, 155};
 const double GOAL1_HOR_ANGLE = -M_PI / 69;
 const double GOAL2_HOR_ANGLE = M_PI / 69;
 const int GOAL1_GOAL_LINE = 85;
 const int GOAL2_GOAL_LINE = 915;
-const int CROSSBAR_HEIGHT = WINDOW_HEIGHT_/8 - 22 + GOAL_VERT_HEIGHT - 2 * GOAL_HOR_HEIGHT;
+const double CROSSBAR_HEIGHT = 145.5;
 
 const double GAMMA = 1.5;
 const vector_t GRAVITY = {0, -400};
@@ -121,7 +121,7 @@ const char *BALL_PIC = "images/ball.png";
 const double CIRCLE_POINTS = 40;
 const double BALL_MASS = 1;
 const double BALL_RADIUS = 25;
-const vector_t BALL_SPAWN = {WINDOW_WIDTH_/2 , 400};
+const vector_t BALL_SPAWN = {250 , 400};
 const double BALL_MAX_VELOCITY = 1000;
 const double BALL_MAX_VELOCITY_SCALE = 0.5;
 
@@ -299,7 +299,7 @@ void make_sounds(scene_t *scene) {
     }
 }
 
-body_t *make_rectangle(int length, int height, vector_t spawn){
+body_t *make_rectangle(int length, int height, vector_t spawn) {
     list_t *rectangle = list_init(4, free);
     vector_t *v = malloc(sizeof(*v));
     *v = (vector_t) {-length, -height};
@@ -370,12 +370,6 @@ void make_goals(scene_t *scene) {
     scene_add_body(scene, hor_goal2);
 }
 
-bool hits_edge_player(body_t *body, double dt) {
-    if (body_get_centroid(body).x + PLAYER_RADIUS + body_get_velocity(body).x * dt >= WINDOW_WIDTH_) {return true;}
-    else if (body_get_centroid(body).x - PLAYER_RADIUS + body_get_velocity(body).x * dt <= 0) {return true;}
-    return false;
-}
-
 list_t *circle_init(double radius) {
     list_t *circle = list_init(CIRCLE_POINTS, free);
     double arc_angle = 2 * M_PI / CIRCLE_POINTS;
@@ -410,7 +404,7 @@ body_t *make_oval(rgb_color_t *color, double radius, double x_scalar, double y_s
     return body_init(c, PLAYER_MASS, *color);
 }
 
-body_t *make_p2_leg(scene_t *scene, rgb_color_t *color, vector_t spawn, vector_t top_right){
+body_t *make_p2_leg(scene_t *scene, rgb_color_t *color, vector_t spawn, vector_t top_right) {
     list_t *leg = list_init(5, free);
     
     vector_t *v = malloc(sizeof(*v));
@@ -453,7 +447,7 @@ body_t *make_p2_leg(scene_t *scene, rgb_color_t *color, vector_t spawn, vector_t
     return body;
 }
 
-body_t *make_p1_leg(scene_t *scene, rgb_color_t *color, vector_t spawn, vector_t top_left){
+body_t *make_p1_leg(scene_t *scene, rgb_color_t *color, vector_t spawn, vector_t top_left) {
     list_t *leg = list_init(5, free);
     
     vector_t *v = malloc(sizeof(*v));
@@ -523,8 +517,8 @@ void check_edge(scene_t *scene) {
             vector_t new_centroid = {.x = 20, .y = c.y};
             body_set_centroid(body, new_centroid);
         }
-        else if (c.x >= 1015) {
-            vector_t new_centroid = {.x = 1010, .y = c.y};
+        else if (c.x >= 985) {
+            vector_t new_centroid = {.x = 980, .y = c.y};
             body_set_centroid(body, new_centroid);
         }
     }
@@ -545,16 +539,16 @@ bool check_goal(body_t *ball, player_t *p1, player_t *p2) {
     return false;
 }
 
-void play_goal_sound(){
+void play_goal_sound() {
     Mix_Chunk *goal = Mix_LoadWAV("sounds/ronaldo.wav");
     Mix_PlayChannel(1, goal, 0);
 }
 
-void channel_done(int channel){
+void channel_done(int channel) {
     Mix_FreeChunk(Mix_GetChunk(channel));
 }
 
-void reset_scene(scene_t *scene, player_t *player1, player_t *player2){
+void reset_scene(scene_t *scene, player_t *player1, player_t *player2) {
     body_t *p1_body = player_get_body(player1);
     body_t *p1_leg = player_get_leg(player1);
     body_t *p2_body = player_get_body(player2);
@@ -774,7 +768,7 @@ void free_scoreboard(SDL_Rect *p1_board, SDL_Rect *p2_board, SDL_Rect *time_boar
     free(winner);
 }
 
-void print_winner(char *winner, int p1_score, int p2_score){
+void print_winner(char *winner, int p1_score, int p2_score) {
     if(p1_score > p2_score){
         strcpy(winner, "Player 1 wins!");
     }
