@@ -85,7 +85,7 @@ void sdl_show(void);
 
 void sdl_render_scene(scene_t *scene);
 
-void sdl_render_game_scene(scene_t *scene, char *p1, char *p2, char *timer, SDL_Rect *p1_scoreboard, SDL_Rect *p2_scoreboard, SDL_Rect *time_board, TTF_Font *font, SDL_Color color);
+void sdl_render_game_scene(scene_t *scene, char *p1, char *p2, char *timer, char *winner, SDL_Rect *p1_scoreboard, SDL_Rect *p2_scoreboard, SDL_Rect *time_board, SDL_Rect *disp_winner, TTF_Font *font, SDL_Color color);
 
 /**
  * Registers a function to be called every time a key is pressed.
@@ -134,5 +134,7 @@ void generate_text(char *text, TTF_Font *font, SDL_Color color, SDL_Rect *rect);
 SDL_Rect *sdl_rect_init(int x, int y, int w, int h);
 
 void make_scoreboard(char *p1, char *p2, char *timer, SDL_Rect *p1_scoreboard, SDL_Rect *p2_scoreboard, SDL_Rect *timer_rect, TTF_Font *font, SDL_Color color);
+
+void display_winner(char *winner_message, SDL_Rect *winner_disp, TTF_Font *font, SDL_Color color);
 
 #endif // #ifndef __SDL_WRAPPER_H__

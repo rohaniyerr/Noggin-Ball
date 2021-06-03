@@ -5,6 +5,8 @@
         "polygon.h": "c",
         "scene.h": "c",
         "player.h": "c",
-        "sdl_image.h": "c"
+        "sdl_image.h": "c",
+        "chrono": "c",
+        "__locale": "c"
     }
 }

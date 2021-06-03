@@ -322,7 +322,7 @@ void sdl_render_scene(scene_t *scene) {
     sdl_show();
 }
 
-void sdl_render_game_scene(scene_t *scene, char *p1, char *p2, char *timer, SDL_Rect *p1_scoreboard, SDL_Rect *p2_scoreboard, SDL_Rect *time_board, TTF_Font *font, SDL_Color color) {
+void sdl_render_game_scene(scene_t *scene, char *p1, char *p2, char *timer, char *winner, SDL_Rect *p1_scoreboard, SDL_Rect *p2_scoreboard, SDL_Rect *time_board, SDL_Rect *disp_winner, TTF_Font *font, SDL_Color color) {
     sdl_clear();
     if (is_SDL_image) {
       SDL_Texture *bkg = scene_get_bkg(scene);
@@ -342,6 +342,9 @@ void sdl_render_game_scene(scene_t *scene, char *p1, char *p2, char *timer, SDL_
         body_set_centroid(body, original_body_position);
     }
     make_scoreboard(p1, p2, timer, p1_scoreboard, p2_scoreboard, time_board, font, color);
+    if(strcmp(timer, "0") == 0){
+        display_winner(winner, disp_winner, font, color);
+    }
     sdl_show();
 }
 
@@ -405,4 +408,8 @@ void make_scoreboard(char *p1, char *p2, char *timer, SDL_Rect *p1_scoreboard, S
     generate_text(p1, font, color, p1_scoreboard);
     generate_text(p2, font, color, p2_scoreboard);
     generate_text(timer, font, color, time_board);
+}
+
+void display_winner(char *winner_message, SDL_Rect *winner_disp, TTF_Font *font, SDL_Color color){
+    generate_text(winner_message, font, color, winner_disp);
 }
