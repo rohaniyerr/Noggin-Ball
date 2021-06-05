@@ -102,10 +102,10 @@ const int SOUND_LOOPS = -1;
 const double PLAYER_RADIUS = 45;
 const double PLAYER1_ANGLE = -M_PI/5;
 const double PLAYER2_ANGLE = M_PI/5;
-const vector_t PLAYER1_BODY_SPAWN = {200, 70};
-const vector_t PLAYER2_BODY_SPAWN = {800, 70};
-const vector_t PLAYER1_LEG_SPAWN = {240, 70};
-const vector_t PLAYER2_LEG_SPAWN = {760, 70};
+const vector_t PLAYER1_BODY_SPAWN = {200, 110};
+const vector_t PLAYER2_BODY_SPAWN = {800, 110};
+const vector_t PLAYER1_LEG_SPAWN = {240, 110};
+const vector_t PLAYER2_LEG_SPAWN = {760, 110};
 const double PLAYER_MAJOR_AXIS = 0.7;
 const double PLAYER_MINOR_AXIS = 0.9;
 const vector_t PLAYER1_LEG_TOP_LEFT = {215, 92};
@@ -121,7 +121,7 @@ const char *BALL_PIC = "images/ball.png";
 const double CIRCLE_POINTS = 40;
 const double BALL_MASS = 1;
 const double BALL_RADIUS = 25;
-const vector_t BALL_SPAWN = {250 , 400};
+const vector_t BALL_SPAWN = {500, 400};
 const double BALL_MAX_VELOCITY = 1000;
 const double BALL_MAX_VELOCITY_SCALE = 0.5;
 
@@ -513,6 +513,13 @@ void check_edge(scene_t *scene) {
     for (size_t i = 0; i < 5; i++) {
         body_t *body = scene_get_body(scene, i);
         vector_t c = body_get_centroid(body);
+        if (i == P1_LEG_ID || i == P2_LEG_ID) {
+            if (c.y <= 35) {
+                printf("%f\n",c.y);
+                body_set_centroid(body, (vector_t) {c.x, 39});
+                printf("%f\n",c.y);
+            }
+        }
         if (c.x <= 15) {
             vector_t new_centroid = {.x = 20, .y = c.y};
             body_set_centroid(body, new_centroid);
