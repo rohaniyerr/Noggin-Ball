@@ -102,10 +102,10 @@ const int SOUND_LOOPS = -1;
 const double PLAYER_RADIUS = 45;
 const double PLAYER1_ANGLE = -M_PI/5;
 const double PLAYER2_ANGLE = M_PI/5;
-const vector_t PLAYER1_BODY_SPAWN = {200, 110};
-const vector_t PLAYER2_BODY_SPAWN = {800, 110};
-const vector_t PLAYER1_LEG_SPAWN = {240, 110};
-const vector_t PLAYER2_LEG_SPAWN = {760, 110};
+const vector_t PLAYER1_BODY_SPAWN = {200, 200};
+const vector_t PLAYER2_BODY_SPAWN = {800, 200};
+const vector_t PLAYER1_LEG_SPAWN = {240, 200};
+const vector_t PLAYER2_LEG_SPAWN = {760, 200};
 const double PLAYER_MAJOR_AXIS = 0.7;
 const double PLAYER_MINOR_AXIS = 0.9;
 const vector_t PLAYER1_LEG_TOP_LEFT = {215, 92};
@@ -125,26 +125,32 @@ const vector_t BALL_SPAWN = {500, 400};
 const double BALL_MAX_VELOCITY = 1000;
 const double BALL_MAX_VELOCITY_SCALE = 0.5;
 
+//ding player_t model
 player_t *make_ding(body_t *body, body_t *leg) {
     return player_init(body, leg, DING_JUMP_SCALAR, DING_SPEED_SCALAR, DING_GRAVITY, DING_PIC);
 }
 
+//riiyer player_t model
 player_t *make_riiyer(body_t *body, body_t *leg) {
     return player_init(body, leg, RIIYER_JUMP_SCALAR, RIIYER_SPEED_SCALAR, RIIYER_GRAVITY, RIIYER_PIC);
 }
 
+//dzli player_t model
 player_t *make_dzli(body_t *body, body_t *leg) {
     return player_init(body, leg, DZLI_JUMP_SCALAR, DZLI_SPEED_SCALAR, DZLI_GRAVITY, DZLI_PIC);
 }
 
+//eseiner player_t model
 player_t *make_eseiner(body_t *body, body_t *leg) {
     return player_init(body, leg, ESEINER_JUMP_SCALAR, ESEINR_SPEED_SCALAR, ESEINER_GRAVITY, ESEINER_PIC);
 }
 
+//sdunbar player_t model
 player_t *make_sdunbar(body_t *body, body_t *leg) {
     return player_init(body, leg, SDUNBAR_JUMP_SCALAR, SDUNBAR_SPEED_SCALAR, SDUNBAR_GRAVITY, SDUNBAR_PIC);
 }
 
+//make and set player1
 void make_player1(scene_t *scene, size_t index) {
     body_t *p1_body = scene_get_body(scene, P1_BODY_ID);
     body_t *p1_leg = scene_get_body(scene, P1_LEG_ID);
@@ -171,6 +177,7 @@ void make_player1(scene_t *scene, size_t index) {
     scene_set_p1(scene, index);
 }
 
+//make and set player2
 void make_player2(scene_t *scene, size_t index) {
     body_t *p2_body = scene_get_body(scene, P2_BODY_ID);
     body_t *p2_leg = scene_get_body(scene, P2_LEG_ID);
@@ -197,6 +204,7 @@ void make_player2(scene_t *scene, size_t index) {
     scene_set_p2(scene, index);
 }
 
+//key controls for both characters
 void on_key_player(char key, key_event_type_t type, void *scene) {
     body_t *body2 = scene_get_body((scene_t*)scene, P2_BODY_ID);
     body_t *leg2 = scene_get_body((scene_t*)scene, P2_LEG_ID);
@@ -288,6 +296,7 @@ void on_key_player(char key, key_event_type_t type, void *scene) {
     }
 }
 
+//make sounds for scenes
 void make_sounds(scene_t *scene) {
     if(!Mix_PlayingMusic()){
         SDL_Init(SDL_INIT_AUDIO);
@@ -299,6 +308,7 @@ void make_sounds(scene_t *scene) {
     }
 }
 
+//make rectangle (for goals/walls/floor)
 body_t *make_rectangle(int length, int height, vector_t spawn) {
     list_t *rectangle = list_init(4, free);
     vector_t *v = malloc(sizeof(*v));
@@ -319,6 +329,7 @@ body_t *make_rectangle(int length, int height, vector_t spawn) {
     return body;
 }
 
+//make walls using make_rectangle
 void make_walls(scene_t *scene) {
     int size = 5;
     rgb_color_t *BLACK = rgb_color_init(0,0,0);
@@ -344,6 +355,7 @@ void make_walls(scene_t *scene) {
     scene_add_body(scene, wall4);
 }
 
+//make goals using make_rectangle
 void make_goals(scene_t *scene) {
     rgb_color_t *white = rgb_color_init(1, 1, 1);
  
@@ -370,6 +382,7 @@ void make_goals(scene_t *scene) {
     scene_add_body(scene, hor_goal2);
 }
 
+//make circle
 list_t *circle_init(double radius) {
     list_t *circle = list_init(CIRCLE_POINTS, free);
     double arc_angle = 2 * M_PI / CIRCLE_POINTS;
@@ -383,6 +396,7 @@ list_t *circle_init(double radius) {
     return circle;
 }
 
+//make ball using make_circle
 body_t *make_ball(scene_t *scene, double radius) {
     list_t *circ = circle_init(radius);
     body_t *ball = body_init(circ, BALL_MASS, choose_rand_color());
@@ -393,6 +407,7 @@ body_t *make_ball(scene_t *scene, double radius) {
     return ball;
 }
 
+//make oval for body
 body_t *make_oval(rgb_color_t *color, double radius, double x_scalar, double y_scalar) {
     list_t *c = list_init(CIRCLE_POINTS, (free_func_t) free);
     for (size_t i = 0; i < CIRCLE_POINTS; i++) {
@@ -404,6 +419,7 @@ body_t *make_oval(rgb_color_t *color, double radius, double x_scalar, double y_s
     return body_init(c, PLAYER_MASS, *color);
 }
 
+//make leg for player2
 body_t *make_p2_leg(scene_t *scene, rgb_color_t *color, vector_t spawn, vector_t top_right) {
     list_t *leg = list_init(5, free);
     
@@ -447,6 +463,7 @@ body_t *make_p2_leg(scene_t *scene, rgb_color_t *color, vector_t spawn, vector_t
     return body;
 }
 
+//make leg for player1
 body_t *make_p1_leg(scene_t *scene, rgb_color_t *color, vector_t spawn, vector_t top_left) {
     list_t *leg = list_init(5, free);
     
@@ -492,6 +509,7 @@ body_t *make_p1_leg(scene_t *scene, rgb_color_t *color, vector_t spawn, vector_t
     return body;
 }
 
+//make body for players
 body_t *make_player_body(scene_t *scene, rgb_color_t *color, vector_t spawn) {
     body_t *player_body = make_oval(color, PLAYER_RADIUS, PLAYER_MAJOR_AXIS, PLAYER_MINOR_AXIS);
     body_set_color(player_body, color);
@@ -501,6 +519,7 @@ body_t *make_player_body(scene_t *scene, rgb_color_t *color, vector_t spawn) {
     return player_body;
 }
 
+//check edge for ball, bodies, and legs
 void check_edge(scene_t *scene) {
     body_t *ball = scene_get_body(scene, BALL_ID);
     vector_t centroid = body_get_centroid(ball);
@@ -515,9 +534,8 @@ void check_edge(scene_t *scene) {
         vector_t c = body_get_centroid(body);
         if (i == P1_LEG_ID || i == P2_LEG_ID) {
             if (c.y <= 35) {
-                printf("%f\n",c.y);
                 body_set_centroid(body, (vector_t) {c.x, 39});
-                printf("%f\n",c.y);
+                body_set_velocity(body, (vector_t) {body_get_velocity(body).x, 0});
             }
         }
         if (c.x <= 15) {
@@ -531,6 +549,7 @@ void check_edge(scene_t *scene) {
     }
 }
 
+//check if a goal has been scored
 bool check_goal(body_t *ball, player_t *p1, player_t *p2) {
     vector_t centroid = body_get_centroid(ball);
     if (centroid.y + BALL_RADIUS <= CROSSBAR_HEIGHT) {
@@ -546,15 +565,18 @@ bool check_goal(body_t *ball, player_t *p1, player_t *p2) {
     return false;
 }
 
+//play sound if a goal is scored
 void play_goal_sound() {
     Mix_Chunk *goal = Mix_LoadWAV("sounds/ronaldo.wav");
     Mix_PlayChannel(1, goal, 0);
 }
 
+//closes sound
 void channel_done(int channel) {
     Mix_FreeChunk(Mix_GetChunk(channel));
 }
 
+//resets scene, called only when goal is scored
 void reset_scene(scene_t *scene, player_t *player1, player_t *player2) {
     body_t *p1_body = player_get_body(player1);
     body_t *p1_leg = player_get_leg(player1);
@@ -573,12 +595,18 @@ void reset_scene(scene_t *scene, player_t *player1, player_t *player2) {
     }
 }
 
+//cap the velocity of the ball
 void ball_too_fast(body_t *ball) {
     if (vec_magnitude(body_get_velocity(ball)) > BALL_MAX_VELOCITY) {
         body_set_velocity(ball, vec_multiply(BALL_MAX_VELOCITY_SCALE, body_get_velocity(ball)));
     }
 }
 
+//initialize forces for every body in the scene
+//gravity on ball and bodies
+//normal force on ball and bodies
+//drag on ball
+//elasticity between ball/bodies on the walls/floor
 void make_forces(scene_t *scene) {
     body_t *ball = scene_get_body(scene, BALL_ID);
     player_t *player1 = scene_get_player1(scene);
@@ -611,6 +639,7 @@ void make_forces(scene_t *scene) {
     }
 }
 
+//makes all the sprites in the game (walls/floor/bodies/ball)
 void make_shapes(scene_t *soccer_scene) {
     rgb_color_t *GREEN = rgb_color_init(0,1,0);
     rgb_color_t *BLUE = rgb_color_init(0,0,1);
@@ -627,6 +656,7 @@ void make_shapes(scene_t *soccer_scene) {
     make_goals(soccer_scene);
 }
 
+//on_key function for title screen
 void on_key_title(char key, key_event_type_t type, void *scene) {
     if (type == KEY_PRESSED) {
         switch (key) {
@@ -646,6 +676,7 @@ void on_key_title(char key, key_event_type_t type, void *scene) {
     }
 }
 
+//on_key function for character selection screen
 void on_key_char(char key, key_event_type_t type, void *scene) {
     if (type == KEY_PRESSED) {
         switch (key) {
@@ -688,6 +719,7 @@ void on_key_char(char key, key_event_type_t type, void *scene) {
     }
 }
 
+//ensure players legs do not separate too far from the bodies
 void check_player_legs(scene_t *scene, player_t *p1, player_t *p2) {
     body_t *p1_body = player_get_body(p1);
     body_t *p1_leg = player_get_leg(p1);
@@ -716,6 +748,7 @@ void check_player_legs(scene_t *scene, player_t *p1, player_t *p2) {
     }   
 }
 
+//stop players from passing through each other
 void prevent_intersection(player_t *player1, player_t *player2) {
     vector_t p1_cent = body_get_centroid(player_get_body(player1));
     vector_t p2_cent = body_get_centroid(player_get_body(player2));
@@ -746,6 +779,7 @@ void prevent_intersection(player_t *player1, player_t *player2) {
     }
 }
 
+//updates the scoreboard
 int update_player_scoreboard(player_t *player, int score, char *score_str) {
     if (player_get_score(player) != score) {
         score = player_get_score(player);
@@ -754,6 +788,7 @@ int update_player_scoreboard(player_t *player, int score, char *score_str) {
     return score;
 }
 
+//updates the timer
 int update_timer(double time, int seconds, char *timer) {
     int temp_secs = GAME_TIME - time;
     if (temp_secs != seconds) {
@@ -763,6 +798,7 @@ int update_timer(double time, int seconds, char *timer) {
     return seconds;
 }
 
+//frees the scoreboard
 void free_scoreboard(SDL_Rect *p1_board, SDL_Rect *p2_board, SDL_Rect *time_board, SDL_Rect *disp_winner, char *p1, char *p2, char *timer, char *winner, TTF_Font *font) {
     free(p1_board);
     free(p2_board);
@@ -775,6 +811,7 @@ void free_scoreboard(SDL_Rect *p1_board, SDL_Rect *p2_board, SDL_Rect *time_boar
     free(winner);
 }
 
+//prints the winner (when timer runs out)
 void print_winner(char *winner, int p1_score, int p2_score) {
     if(p1_score > p2_score){
         strcpy(winner, "Player 1 wins!");
@@ -789,21 +826,24 @@ void print_winner(char *winner, int p1_score, int p2_score) {
 
 int main() {
     sdl_init(MIN_POINT, MAX_POINT);
+    //initialize scenes
     scene_t *title = scene_init();
     scene_t *soccer_scene = scene_init();
     scene_t *char_scene = scene_init();
     
+    //default player1 and player2 indices
     size_t p1_idx = scene_get_p1(char_scene);
     size_t p2_idx = scene_get_p2(char_scene);
 
     sdl_on_key((key_handler_t) on_key_title);
-    
+
     make_SDL_image();
 
     scene_set_bkg_image(title, TITLE_PIC);
     scene_set_bkg_image(char_scene, CHAR_SELECT_PIC);
     sdl_init_textures(title);
 
+    //running the title screen
     while (!sdl_is_done(title)) {
         double dt = time_since_last_tick();
         scene_tick(title, dt);
@@ -814,7 +854,7 @@ int main() {
             sdl_on_key((key_handler_t) on_key_char);
 
             sdl_init_textures(char_scene);
-
+            //running the character selection screen
             while (!sdl_is_done(char_scene)) {
                 double dt = time_since_last_tick();
                 scene_tick(char_scene, dt);
@@ -828,6 +868,7 @@ int main() {
         }
     }
 
+    //make shapes and players for game scene
     make_shapes(soccer_scene);
     make_player1(soccer_scene, p1_idx);
     make_player2(soccer_scene, p2_idx);
@@ -840,6 +881,7 @@ int main() {
 
     scene_set_bkg_image(soccer_scene, BKG_PIC);
 
+    //scoreboard
     TTF_Font *font = TTF_OpenFont(FONT_PATH, FONT_SIZE);
     SDL_Rect *p1_scoreboard = sdl_rect_init(340, 20, 50, 70);
     SDL_Rect *p2_scoreboard = sdl_rect_init(600, 20, 50, 70);
@@ -847,6 +889,7 @@ int main() {
     SDL_Rect *disp_winner = sdl_rect_init(160, 150, 700, 90);
     SDL_Color black = {0, 0, 0, 255};
 
+    //timer and score
     char *p1 = malloc(sizeof(char) * 3);
     char *p2 = malloc(sizeof(char) * 3);
     char *timer = malloc(sizeof(char) * 3);
