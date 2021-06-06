@@ -204,6 +204,19 @@ void make_player2(scene_t *scene, size_t index) {
     scene_set_p2(scene, index);
 }
 
+//make sounds for scenes
+void make_sounds(scene_t *scene) {
+    if(!Mix_PlayingMusic()){
+        SDL_Init(SDL_INIT_AUDIO);
+        Mix_Init(MIX_INIT_FLAC | MIX_INIT_MOD | MIX_INIT_MP3 | MIX_INIT_OGG);
+        Mix_OpenAudio(SOUND_FREQUENCY, MIX_DEFAULT_FORMAT, SOUND_CHANNELS, SOUND_CHUNKSIZE);
+        Mix_Music *sound = Mix_LoadMUS(BKG_SOUND);
+        scene_set_bkg_sound(scene, sound);
+        Mix_PlayMusic(sound, SOUND_LOOPS);
+    }
+}
+
+
 //key controls for both characters
 void on_key_player(char key, key_event_type_t type, void *scene) {
     body_t *body2 = scene_get_body((scene_t*)scene, P2_BODY_ID);
@@ -242,6 +255,18 @@ void on_key_player(char key, key_event_type_t type, void *scene) {
                 if (true == true) {
                     body_set_rotation(leg2, -KICK_ANGLE);
                     break;
+                }
+            case SDLK_m:
+                if(true == true){
+                    if(!Mix_PlayingMusic()){
+                        make_sounds(scene);
+                    }
+                    else if(Mix_PausedMusic()){
+                        Mix_ResumeMusic();
+                    }
+                    else{
+                        Mix_PauseMusic();
+                    }
                 }
         }
     }
@@ -296,17 +321,6 @@ void on_key_player(char key, key_event_type_t type, void *scene) {
     }
 }
 
-//make sounds for scenes
-void make_sounds(scene_t *scene) {
-    if(!Mix_PlayingMusic()){
-        SDL_Init(SDL_INIT_AUDIO);
-        Mix_Init(MIX_INIT_FLAC | MIX_INIT_MOD | MIX_INIT_MP3 | MIX_INIT_OGG);
-        Mix_OpenAudio(SOUND_FREQUENCY, MIX_DEFAULT_FORMAT, SOUND_CHANNELS, SOUND_CHUNKSIZE);
-        Mix_Music *sound = Mix_LoadMUS(BKG_SOUND);
-        scene_set_bkg_sound(scene, sound);
-        Mix_PlayMusic(sound, SOUND_LOOPS);
-    }
-}
 
 //make rectangle (for goals/walls/floor)
 body_t *make_rectangle(int length, int height, vector_t spawn) {
