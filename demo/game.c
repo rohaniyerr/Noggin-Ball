@@ -125,6 +125,10 @@ const vector_t BALL_SPAWN = {500, 400};
 const double BALL_MAX_VELOCITY = 1000;
 const double BALL_MAX_VELOCITY_SCALE = 0.5;
 
+const int TITLE_INDEX = 0;
+const int CHAR_SELECT_INDEX = 1;
+const int GAME_INDEX = 2;
+
 //ding player_t model
 player_t *make_ding(body_t *body, body_t *leg) {
     return player_init(body, leg, DING_JUMP_SCALAR, DING_SPEED_SCALAR, DING_GRAVITY, DING_PIC);
@@ -214,8 +218,13 @@ void make_sounds(scene_t *scene) {
         scene_set_bkg_sound(scene, sound);
         Mix_PlayMusic(sound, SOUND_LOOPS);
     }
+    else if(Mix_PausedMusic()){
+        Mix_ResumeMusic();
+    }
+    else{
+        Mix_PauseMusic();
+    }
 }
-
 
 //key controls for both characters
 void on_key_player(char key, key_event_type_t type, void *scene) {
@@ -255,18 +264,6 @@ void on_key_player(char key, key_event_type_t type, void *scene) {
                 if (true == true) {
                     body_set_rotation(leg2, -KICK_ANGLE);
                     break;
-                }
-            case SDLK_m:
-                if(true == true){
-                    if(!Mix_PlayingMusic()){
-                        make_sounds(scene);
-                    }
-                    else if(Mix_PausedMusic()){
-                        Mix_ResumeMusic();
-                    }
-                    else{
-                        Mix_PauseMusic();
-                    }
                 }
         }
     }
@@ -312,6 +309,16 @@ void on_key_player(char key, key_event_type_t type, void *scene) {
                     body_set_rotation(leg1, KICK_ANGLE);
                     break;
                 }
+            case SDLK_m:
+                if(true == true){
+                    make_sounds(scene);
+                    break;
+                }
+            case SDLK_q:
+                if(true == true){
+                    exit(0);
+                    break;
+                }
         }
     }
     else {
@@ -320,7 +327,6 @@ void on_key_player(char key, key_event_type_t type, void *scene) {
         body_set_velocity(leg1, NO_X2);
     }
 }
-
 
 //make rectangle (for goals/walls/floor)
 body_t *make_rectangle(int length, int height, vector_t spawn) {
@@ -686,6 +692,7 @@ void on_key_title(char key, key_event_type_t type, void *scene) {
                 }
             case SDLK_q:
                 exit(0);
+                break;
         }
     }
 }
@@ -838,61 +845,49 @@ void print_winner(char *winner, int p1_score, int p2_score) {
     }
 }
 
+//sdl for title
+char sdl_title(scene_t *title) {
+    sdl_on_key((key_handler_t) on_key_title);
+    //running the title screen
+    double dt = time_since_last_tick();
+    scene_tick(title, dt);
+    sdl_render_scene(title);   
+    if (scene_get_info(title) == 't') { scene_free(title); return 't';}
+    else if (scene_get_info(title) == 'c') {
+        return 'c';
+    }
+    return ' ';
+}
+
+//sdl for char_scene
+bool sdl_char_scene(scene_t *char_scene) {
+    sdl_on_key((key_handler_t) on_key_char);
+
+    sdl_init_textures(char_scene);
+    //running the character selection screen
+    double dt = time_since_last_tick();
+    scene_tick(char_scene, dt);
+    sdl_render_scene(char_scene);
+    if (scene_get_info(char_scene) == 'g') { return true;}
+    return false;
+}
+
 int main() {
     sdl_init(MIN_POINT, MAX_POINT);
     //initialize scenes
     scene_t *title = scene_init();
     scene_t *soccer_scene = scene_init();
     scene_t *char_scene = scene_init();
-    
-    //default player1 and player2 indices
-    size_t p1_idx = scene_get_p1(char_scene);
-    size_t p2_idx = scene_get_p2(char_scene);
 
-    sdl_on_key((key_handler_t) on_key_title);
+    list_t *list = list_init(3, (free_func_t) scene_free);
+    list_add(list, title); list_add(list, char_scene); list_add(list, soccer_scene);
 
     make_SDL_image();
 
     scene_set_bkg_image(title, TITLE_PIC);
     scene_set_bkg_image(char_scene, CHAR_SELECT_PIC);
     sdl_init_textures(title);
-
-    //running the title screen
-    while (!sdl_is_done(title)) {
-        double dt = time_since_last_tick();
-        scene_tick(title, dt);
-        sdl_render_scene(title);   
-        if (scene_get_info(title) == 't') { scene_free(title); break;}
-        else if (scene_get_info(title) == 'c') {
-            scene_free(title);
-            sdl_on_key((key_handler_t) on_key_char);
-
-            sdl_init_textures(char_scene);
-            //running the character selection screen
-            while (!sdl_is_done(char_scene)) {
-                double dt = time_since_last_tick();
-                scene_tick(char_scene, dt);
-                sdl_render_scene(char_scene);
-                if (scene_get_info(char_scene) == 'g') { break;}
-            }
-            p1_idx = scene_get_p1(char_scene);
-            p2_idx = scene_get_p2(char_scene);
-            scene_free(char_scene);
-            break;
-        }
-    }
-
-    //make shapes and players for game scene
-    make_shapes(soccer_scene);
-    make_player1(soccer_scene, p1_idx);
-    make_player2(soccer_scene, p2_idx);
-    make_forces(soccer_scene);
-
-    player_t *player1 = scene_get_player1(soccer_scene);
-    player_t *player2 = scene_get_player2(soccer_scene);
     
-    sdl_on_key((key_handler_t) on_key_player);
-
     scene_set_bkg_image(soccer_scene, BKG_PIC);
 
     //scoreboard
@@ -903,44 +898,77 @@ int main() {
     SDL_Rect *disp_winner = sdl_rect_init(160, 150, 700, 90);
     SDL_Color black = {0, 0, 0, 255};
 
+    int p1_score = 0;
+    int p2_score = 0;
+
     //timer and score
     char *p1 = malloc(sizeof(char) * 3);
     char *p2 = malloc(sizeof(char) * 3);
     char *timer = malloc(sizeof(char) * 3);
     char *winner  = malloc(sizeof(char) * 15);
-
-    int p1_score = player_get_score(player1);
-    int p2_score = player_get_score(player2);
     double time = 0;
-    sprintf(p1, "%d", p1_score);
-    sprintf(p2, "%d", p2_score);
     int seconds = GAME_TIME - time;
-    sprintf(timer, "%d", seconds);
 
-    sdl_init_textures(soccer_scene);
-    make_sounds(soccer_scene);
-
-    while (!sdl_is_done(soccer_scene)) {
-        double dt = time_since_last_tick();
-        time += dt;
-        if (time > GAME_TIME) {
-            break;
+    size_t curr_scene = 0;
+    bool set_up = false;
+    while(!sdl_is_done(list_get(list, curr_scene))) {    
+        //run title
+        if (curr_scene == TITLE_INDEX) { 
+            char c = sdl_title(list_get(list, 0));
+            if (c == 'c') {curr_scene = CHAR_SELECT_INDEX;}
+            else if (c == 't') {curr_scene = GAME_INDEX;}
         }
-        check_edge(soccer_scene);
-        check_player_legs(soccer_scene, player1, player2);
-        prevent_intersection(player1, player2);
-        ball_too_fast(scene_get_body(soccer_scene, BALL_ID));
-        reset_scene(soccer_scene, player1, player2);
-        scene_tick(soccer_scene, dt);
-        sdl_render_game_scene(soccer_scene, p1, p2, timer, winner, p1_scoreboard, p2_scoreboard, time_board, disp_winner, font, black);
-        p1_score = update_player_scoreboard(player1, p1_score, p1);
-        p2_score = update_player_scoreboard(player2, p2_score, p2);
-        seconds = update_timer(time, seconds, timer);
-        if(strcmp(timer, "0") == 0){
-            print_winner(winner, p1_score, p2_score);
+        //run char_select
+        else if (curr_scene == CHAR_SELECT_INDEX) { if (sdl_char_scene(char_scene)) {curr_scene = GAME_INDEX;} }
+        //run game
+        else if (curr_scene == GAME_INDEX) {
+            if (!set_up) {
+                size_t p1_idx = scene_get_p1(char_scene);
+                size_t p2_idx = scene_get_p2(char_scene);
+
+                make_shapes(soccer_scene);
+                make_player1(soccer_scene, p1_idx);
+                make_player2(soccer_scene, p2_idx);
+                make_forces(soccer_scene);
+                make_sounds(soccer_scene);
+
+                player_t *player1 = scene_get_player1(soccer_scene);
+                player_t *player2 = scene_get_player2(soccer_scene);
+
+                int p1_score = player_get_score(player1);
+                int p2_score = player_get_score(player2);
+                sprintf(p1, "%d", p1_score);
+                sprintf(p2, "%d", p2_score);
+                sprintf(timer, "%d", seconds);
+                scene_set_bkg_image(soccer_scene, BKG_PIC);
+                sdl_init_textures(soccer_scene);
+                set_up = true;
+            }
+            player_t *player1 = scene_get_player1(soccer_scene);
+            player_t *player2 = scene_get_player2(soccer_scene);
+            sdl_on_key((key_handler_t) on_key_player);
+            double dt = time_since_last_tick();
+            time += dt;
+            if (time > GAME_TIME) {
+                break;
+            }
+            check_edge(soccer_scene);
+            check_player_legs(soccer_scene, player1, player2);
+            prevent_intersection(player1, player2);
+            ball_too_fast(scene_get_body(soccer_scene, BALL_ID));
+            reset_scene(soccer_scene, player1, player2);
+            scene_tick(soccer_scene, dt);
+            sdl_render_game_scene(soccer_scene, p1, p2, timer, winner, p1_scoreboard, p2_scoreboard, time_board, disp_winner, font, black);
+            p1_score = update_player_scoreboard(player1, p1_score, p1);
+            p2_score = update_player_scoreboard(player2, p2_score, p2);
+            seconds = update_timer(time, seconds, timer);
+            if(strcmp(timer, "0") == 0){
+                print_winner(winner, p1_score, p2_score);
+            }
         }
     }
     free_scoreboard(p1_scoreboard, p2_scoreboard, time_board, disp_winner, p1, p2, timer, winner, font);
+    scene_free(char_scene);
     scene_free(soccer_scene);
     return 0;
 }

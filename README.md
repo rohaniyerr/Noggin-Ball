@@ -6,3 +6,6 @@ Player 1: WASD for movement, C for kicking
 Player 1 options: 1, 2, 3, 4, g
 Player 2: Arrow keys for movement, ‘,’ for kicking
 Player2 options: 5, 6, 7, 8, h
+
+Press m to toggle music
+Press q to quit
