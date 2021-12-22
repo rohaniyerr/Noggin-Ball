@@ -93,7 +93,7 @@ const char *CHAR_SELECT_PIC = "images/charselect.png";
 const char *FONT_PATH = "fonts/OpenSans-Bold.ttf";
 const int FONT_SIZE = 24;
 
-const char *BKG_SOUND = "sounds/crowd.wav";
+const char *BKG_SOUND = "sounds/fuck_spurs.wav";
 const int SOUND_FREQUENCY = 44100;
 const int SOUND_CHANNELS = 2;
 const int SOUND_CHUNKSIZE = 512;
